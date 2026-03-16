@@ -1,0 +1,1 @@
+ /home/noxsener/StudioProjects/music_player/.dart_tool/flutter_build/07ff5a04e4a6a26c3575ee29b631c0a8/native_assets.json: 
