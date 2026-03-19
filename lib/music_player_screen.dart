@@ -44,6 +44,7 @@ _PerfTier get _tier {
 }
 
 bool get _isDesktopTier => _tier == _PerfTier.desktop;
+
 bool get _isAndroidTier => _tier == _PerfTier.android;
 
 // ─────────────────────────────────────────────────────────────
@@ -51,25 +52,25 @@ bool get _isAndroidTier => _tier == _PerfTier.android;
 // ─────────────────────────────────────────────────────────────
 
 abstract class _FC {
-  static const Color bg         = Color(0xFF07090F);
-  static const Color panelBg    = Color(0xFF0C1018);
-  static const Color cardBg     = Color(0xFF101520);
-  static const Color headerBg   = Color(0xFF111928);
-  static const Color border     = Color(0xFF1B2840);
+  static const Color bg = Color(0xFF07090F);
+  static const Color panelBg = Color(0xFF0C1018);
+  static const Color cardBg = Color(0xFF101520);
+  static const Color headerBg = Color(0xFF111928);
+  static const Color border = Color(0xFF1B2840);
 
-  static const Color ledOff     = Color(0xFF081510);
-  static const Color ledLow     = Color(0xFF69FF47);
-  static const Color ledMid     = Color(0xFFFFCB6B);
-  static const Color ledPeak    = Color(0xFFFF5370);
+  static const Color ledOff = Color(0xFF081510);
+  static const Color ledLow = Color(0xFF69FF47);
+  static const Color ledMid = Color(0xFFFFCB6B);
+  static const Color ledPeak = Color(0xFFFF5370);
 
-  static const Color scrubBg    = Color(0xFF0A1520);
-  static const Color btnBg      = Color(0xFF101D30);
-  static const Color btnBorder  = Color(0xFF1E3050);
+  static const Color scrubBg = Color(0xFF0A1520);
+  static const Color btnBg = Color(0xFF101D30);
+  static const Color btnBorder = Color(0xFF1E3050);
 
   // Radio-specific accent (warm violet to distinguish from local cyan)
   static const Color radioAccent = Color(0xFF7C4DFF);
 
-  static const double rXs =  6.0;
+  static const double rXs = 6.0;
   static const double rSm = 10.0;
   static const double rMd = 14.0;
   static const double rLg = 18.0;
@@ -90,23 +91,22 @@ class MusicPlayerScreen extends StatefulWidget {
 
 class _MusicPlayerScreenState extends State<MusicPlayerScreen>
     with TickerProviderStateMixin {
-
   final controller = Get.put(MusicPlayerController());
 
   // ── Animation controllers (same as v2.0) ──────────────────
 
   late final AnimationController _listAnim;
-  late final AnimationController _radioListAnim;  // separate entrance for radio
+  late final AnimationController _radioListAnim; // separate entrance for radio
   late final AnimationController _vuAnim;
   late final AnimationController _glowAnim;
   late final AnimationController _eqAnim;
   late final AnimationController _shimmerAnim;
 
   // EQ state
-  final List<double> _eq       = List.filled(10, 0.0);
-  final List<double> _peaks    = List.filled(10, 0.0);
-  final List<int>    _peakHold = List.filled(10, 0);
-  final math.Random  _rng = math.Random();
+  final List<double> _eq = List.filled(10, 0.0);
+  final List<double> _peaks = List.filled(10, 0.0);
+  final List<int> _peakHold = List.filled(10, 0);
+  final math.Random _rng = math.Random();
   int _skip = 0;
 
   // ── Radio auto-refresh ─────────────────────────────────────
@@ -122,50 +122,60 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
     super.initState();
 
     _listAnim = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600))
-      ..forward();
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
 
     _radioListAnim = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 600));
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
 
     _vuAnim = AnimationController(
-        vsync: this,
-        duration: _isAndroidTier
-            ? const Duration(milliseconds: 150)
-            : const Duration(milliseconds: 80))
-      ..repeat();
+      vsync: this,
+      duration: _isAndroidTier
+          ? const Duration(milliseconds: 150)
+          : const Duration(milliseconds: 80),
+    )..repeat();
 
     _glowAnim = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 2400));
+      vsync: this,
+      duration: const Duration(milliseconds: 2400),
+    );
     if (!_isAndroidTier) _glowAnim.repeat(reverse: true);
 
-    _eqAnim = AnimationController(
-        vsync: this,
-        duration: _isAndroidTier
-            ? const Duration(milliseconds: 300)
-            : const Duration(milliseconds: 200))
-      ..addListener(_tickEq)
-      ..repeat();
+    _eqAnim =
+        AnimationController(
+            vsync: this,
+            duration: _isAndroidTier
+                ? const Duration(milliseconds: 300)
+                : const Duration(milliseconds: 200),
+          )
+          ..addListener(_tickEq)
+          ..repeat();
 
     _shimmerAnim = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 1800));
+      vsync: this,
+      duration: const Duration(milliseconds: 1800),
+    );
     if (!_isAndroidTier) _shimmerAnim.repeat(reverse: true);
 
     // ── Radio: initial load already done in controller.onInit()
     // Start periodic refresh every 60 seconds
-    _radioRefreshTimer = Timer.periodic(
-      const Duration(seconds: 60),
-          (_) {
-        controller.fetchRadioSongs();
-        // Replay entrance animation when list refreshes
-        _radioListAnim..reset()..forward();
-      },
-    );
+    _radioRefreshTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+      controller.fetchRadioSongs();
+      // Replay entrance animation when list refreshes
+      _radioListAnim
+        ..reset()
+        ..forward();
+    });
 
     // Animate radio list on first arrival when tab switches
     ever(controller.radioPlaylist, (_) {
       if (_tab == 1) {
-        _radioListAnim..reset()..forward();
+        _radioListAnim
+          ..reset()
+          ..forward();
       }
     });
   }
@@ -232,20 +242,29 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
     );
   }
 
-  Widget _wideLayout(BoxConstraints c) => Row(children: [
-    SizedBox(width: math.min(400.0, c.maxWidth * 0.45),
-        child: _mainWindow()),
-    Container(width: 1, margin: const EdgeInsets.symmetric(vertical: 14),
-        color: _FC.border),
-    Expanded(child: _playlistWindow()),
-  ]);
+  Widget _wideLayout(BoxConstraints c) => Row(
+    children: [
+      SizedBox(width: math.min(400.0, c.maxWidth * 0.45), child: _mainWindow()),
+      Container(
+        width: 1,
+        margin: const EdgeInsets.symmetric(vertical: 14),
+        color: _FC.border,
+      ),
+      Expanded(child: _playlistWindow()),
+    ],
+  );
 
-  Widget _narrowLayout() => Column(children: [
-    _mainWindow(),
-    Container(height: 1, margin: const EdgeInsets.symmetric(horizontal: 14),
-        color: _FC.border),
-    Expanded(child: _playlistWindow()),
-  ]);
+  Widget _narrowLayout() => Column(
+    children: [
+      _mainWindow(),
+      Container(
+        height: 1,
+        margin: const EdgeInsets.symmetric(horizontal: 14),
+        color: _FC.border,
+      ),
+      Expanded(child: _playlistWindow()),
+    ],
+  );
 
   // ══════════════════════════════════════════════════════════
   //  MAIN WINDOW  (unchanged from v2.0 — only _trackCard differs)
@@ -253,21 +272,24 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
 
   Widget _mainWindow() => Container(
     color: _FC.panelBg,
-    child: Column(mainAxisSize: MainAxisSize.min, children: [
-      _header(),
-      const SizedBox(height: 8),
-      _trackCard(),
-      const SizedBox(height: 8),
-      _visualizerCard(),
-      const SizedBox(height: 8),
-      _seekBar(),
-      _timeRow(),
-      const SizedBox(height: 6),
-      _transportRow(),
-      const SizedBox(height: 6),
-      _volBalRow(),
-      const SizedBox(height: 12),
-    ]),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _header(),
+        const SizedBox(height: 8),
+        _trackCard(),
+        const SizedBox(height: 8),
+        _visualizerCard(),
+        const SizedBox(height: 8),
+        _seekBar(),
+        _timeRow(),
+        const SizedBox(height: 6),
+        _transportRow(),
+        const SizedBox(height: 6),
+        _volBalRow(),
+        const SizedBox(height: 12),
+      ],
+    ),
   );
 
   // ── Header ─────────────────────────────────────────────────
@@ -281,33 +303,63 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
         decoration: BoxDecoration(
           color: _FC.headerBg,
           borderRadius: const BorderRadius.only(
-            bottomLeft:  Radius.circular(_FC.rMd),
+            bottomLeft: Radius.circular(_FC.rMd),
             bottomRight: Radius.circular(_FC.rMd),
           ),
           border: Border.all(color: _FC.border),
-          boxShadow: _isDesktopTier ? [BoxShadow(
-            color: AppRawColors.cyan.withOpacity(0.05 + g * 0.10),
-            blurRadius: 18, spreadRadius: 2, offset: const Offset(0, 4),
-          )] : null,
+          boxShadow: _isDesktopTier
+              ? [
+                  BoxShadow(
+                    color: AppRawColors.cyan.withOpacity(0.05 + g * 0.10),
+                    blurRadius: 18,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(children: [
-          Container(width: 8, height: 8,
-            decoration: BoxDecoration(shape: BoxShape.circle,
+        child: Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
                 color: AppRawColors.cyan,
-                boxShadow: _isAndroidTier ? null : [BoxShadow(
-                    color: AppRawColors.cyan.withOpacity(0.35 + g * 0.45),
-                    blurRadius: 7)]),
-          ),
-          const SizedBox(width: 10),
-          Text('CODENFAST PLAYER', style: TextStyle(
-              fontFamily: _FC.font, fontSize: 12, fontWeight: FontWeight.w700,
-              color: AppRawColors.cyan, letterSpacing: 2.2)),
-          const Spacer(),
-          Text('v2.0', style: TextStyle(
-              fontFamily: _FC.font, fontSize: 10,
-              color: AppRawColors.cyan.withOpacity(0.40), letterSpacing: 1.4)),
-        ]),
+                boxShadow: _isAndroidTier
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: AppRawColors.cyan.withOpacity(0.35 + g * 0.45),
+                          blurRadius: 7,
+                        ),
+                      ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'CODENFAST PLAYER',
+              style: TextStyle(
+                fontFamily: _FC.font,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppRawColors.cyan,
+                letterSpacing: 2.2,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              'v2.0',
+              style: TextStyle(
+                fontFamily: _FC.font,
+                fontSize: 10,
+                color: AppRawColors.cyan.withOpacity(0.40),
+                letterSpacing: 1.4,
+              ),
+            ),
+          ],
+        ),
       );
     },
   );
@@ -322,14 +374,20 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
         color: _FC.cardBg,
         borderRadius: BorderRadius.circular(_FC.rMd),
         border: Border.all(color: _FC.border),
-        boxShadow: _isDesktopTier ? [BoxShadow(
-            color: AppRawColors.cyan.withOpacity(0.035),
-            blurRadius: 12, spreadRadius: 1)] : null,
+        boxShadow: _isDesktopTier
+            ? [
+                BoxShadow(
+                  color: AppRawColors.cyan.withOpacity(0.035),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                ),
+              ]
+            : null,
       ),
       child: Obx(() {
-        final idx        = controller.currentIndex.value;
-        final isRadio    = controller.isRadioMode.value;
-        final hasTrack   = idx >= 0;
+        final idx = controller.currentIndex.value;
+        final isRadio = controller.isRadioMode.value;
+        final hasTrack = idx >= 0;
 
         // ── Determine display values ──────────────────────
         String trackName;
@@ -338,12 +396,14 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
 
         if (!hasTrack) {
           trackName = 'No track selected';
-          tag1 = '–'; tag2 = '–'; tag3 = '';
+          tag1 = '–';
+          tag2 = '–';
+          tag3 = '';
           coverUrl = null;
         } else if (isRadio) {
           final song = controller.radioPlaylist[idx];
           trackName = song.title;
-          coverUrl  = song.imageUrl.isNotEmpty ? song.imageUrl : null;
+          coverUrl = song.imageUrl.isNotEmpty ? song.imageUrl : null;
           tag1 = song.winningStyle;
           tag2 = _fmtSec(song.duration);
           tag3 = 'SUNO';
@@ -356,64 +416,92 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
           tag3 = p.extension(file.path).replaceFirst('.', '').toUpperCase();
         }
 
-        return Row(children: [
-          // Cover art or index pill
-          if (coverUrl != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(_FC.rSm),
-              child: Image.network(
-                coverUrl,
-                width: 40, height: 40,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
-                    _trackPill(hasTrack ? '${idx + 1}' : '--',
-                        isRadio ? _FC.radioAccent : AppRawColors.cyan),
+        return Row(
+          children: [
+            // Cover art or index pill
+            if (coverUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(_FC.rSm),
+                child: Image.network(
+                  coverUrl,
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => _trackPill(
+                    hasTrack ? '${idx + 1}' : '--',
+                    isRadio ? _FC.radioAccent : AppRawColors.cyan,
+                  ),
+                ),
+              )
+            else
+              _trackPill(
+                hasTrack ? (idx + 1).toString().padLeft(2, '0') : '--',
+                isRadio ? _FC.radioAccent : AppRawColors.cyan,
               ),
-            )
-          else
-            _trackPill(hasTrack ? (idx + 1).toString().padLeft(2, '0') : '--',
-                isRadio ? _FC.radioAccent : AppRawColors.cyan),
 
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _isAndroidTier
-                    ? Text(trackName, maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontFamily: _FC.font, fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppRawColors.darkTextPrimary))
-                    : _Marquee(text: trackName),
-                const SizedBox(height: 4),
-                Row(children: [
-                  _Tag(label: tag1,
-                      color: isRadio ? _FC.radioAccent : AppRawColors.neonGreen),
-                  const SizedBox(width: 6),
-                  _Tag(label: tag2, color: AppRawColors.cyan),
-                  if (tag3.isNotEmpty) ...[
-                    const SizedBox(width: 6),
-                    _Tag(label: tag3, color: AppRawColors.violet),
-                  ],
-                ]),
-              ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _isAndroidTier
+                      ? Text(
+                          trackName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontFamily: _FC.font,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppRawColors.darkTextPrimary,
+                          ),
+                        )
+                      : _Marquee(text: trackName),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      _Tag(
+                        label: tag1,
+                        color: isRadio
+                            ? _FC.radioAccent
+                            : AppRawColors.neonGreen,
+                      ),
+                      const SizedBox(width: 6),
+                      _Tag(label: tag2, color: AppRawColors.cyan),
+                      if (tag3.isNotEmpty) ...[
+                        const SizedBox(width: 6),
+                        _Tag(label: tag3, color: AppRawColors.violet),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ]);
+          ],
+        );
       }),
     );
   }
 
   Widget _trackPill(String text, Color color) => Container(
-    width: 36, height: 36, alignment: Alignment.center,
+    width: 36,
+    height: 36,
+    alignment: Alignment.center,
     decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(_FC.rSm),
-        color: color.withOpacity(0.08),
-        border: Border.all(color: color.withOpacity(0.28))),
-    child: Text(text, style: TextStyle(fontFamily: _FC.font,
-        fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+      borderRadius: BorderRadius.circular(_FC.rSm),
+      color: color.withOpacity(0.08),
+      border: Border.all(color: color.withOpacity(0.28)),
+    ),
+    child: Text(
+      text,
+      style: TextStyle(
+        fontFamily: _FC.font,
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: color,
+      ),
+    ),
   );
 
   // ── Visualizer (unchanged) ─────────────────────────────────
@@ -427,49 +515,57 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       border: Border.all(color: _FC.border),
     ),
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    child: Row(children: [
-      AnimatedBuilder(
-        animation: _vuAnim,
-        builder: (_, __) {
-          final on = controller.isPlaying.value;
-          final lv = on ? _rng.nextDouble() * 0.75 + 0.15 : 0.0;
-          final rv = on ? _rng.nextDouble() * 0.75 + 0.15 : 0.0;
-          return Row(children: [
-            _VuMeter(value: lv, label: 'L'),
-            const SizedBox(width: 5),
-            _VuMeter(value: rv, label: 'R'),
-            const SizedBox(width: 12),
-            Container(width: 1, height: 38, color: _FC.border),
-            const SizedBox(width: 12),
-          ]);
-        },
-      ),
-      Expanded(
-        child: AnimatedBuilder(
-          animation: _eqAnim,
-          builder: (_, __) => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: List.generate(10, (i) {
-              final color = i < 3 ? AppRawColors.neonGreen
-                  : i < 7 ? AppRawColors.cyan
-                  : AppRawColors.violet;
-              return _EqBar(value: _eq[i], peak: _peaks[i], color: color);
-            }),
+    child: Row(
+      children: [
+        AnimatedBuilder(
+          animation: _vuAnim,
+          builder: (_, __) {
+            final on = controller.isPlaying.value;
+            final lv = on ? _rng.nextDouble() * 0.75 + 0.15 : 0.0;
+            final rv = on ? _rng.nextDouble() * 0.75 + 0.15 : 0.0;
+            return Row(
+              children: [
+                _VuMeter(value: lv, label: 'L'),
+                const SizedBox(width: 5),
+                _VuMeter(value: rv, label: 'R'),
+                const SizedBox(width: 12),
+                Container(width: 1, height: 38, color: _FC.border),
+                const SizedBox(width: 12),
+              ],
+            );
+          },
+        ),
+        Expanded(
+          child: AnimatedBuilder(
+            animation: _eqAnim,
+            builder: (_, __) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: List.generate(10, (i) {
+                final color = i < 3
+                    ? AppRawColors.neonGreen
+                    : i < 7
+                    ? AppRawColors.cyan
+                    : AppRawColors.violet;
+                return _EqBar(value: _eq[i], peak: _peaks[i], color: color);
+              }),
+            ),
           ),
         ),
-      ),
-    ]),
+      ],
+    ),
   );
 
   // ── Seek bar (unchanged) ───────────────────────────────────
 
   Widget _seekBar() => Obx(() {
-    final pos   = controller.position.value;
-    final dur   = controller.duration.value;
+    final pos = controller.position.value;
+    final dur = controller.duration.value;
     final total = dur.inMilliseconds.toDouble();
-    final cur   = pos.inMilliseconds.toDouble()
-        .clamp(0.0, total > 0 ? total : 1.0);
+    final cur = pos.inMilliseconds.toDouble().clamp(
+      0.0,
+      total > 0 ? total : 1.0,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -492,7 +588,8 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
             overlayColor: AppRawColors.cyan.withOpacity(0.14),
           ),
           child: Slider(
-            min: 0, max: total > 0 ? total : 1.0,
+            min: 0,
+            max: total > 0 ? total : 1.0,
             value: cur,
             onChanged: (v) => controller.seek(v / 1000.0),
           ),
@@ -512,14 +609,19 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _TimeLabel(duration: pos),
-          Obx(() => AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: Icon(
+          Obx(
+            () => AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: Icon(
                 controller.isPlaying.value
-                    ? Icons.graphic_eq_rounded : Icons.pause_rounded,
+                    ? Icons.graphic_eq_rounded
+                    : Icons.pause_rounded,
                 key: ValueKey(controller.isPlaying.value),
-                color: AppRawColors.cyan.withOpacity(0.45), size: 14),
-          )),
+                color: AppRawColors.cyan.withOpacity(0.45),
+                size: 14,
+              ),
+            ),
+          ),
           _TimeLabel(duration: dur, negate: true),
         ],
       ),
@@ -533,34 +635,50 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _Btn(icon: Icons.skip_previous_rounded,
-            onTap: controller.prev, tip: 'Prev'),
+        _Btn(
+          icon: Icons.skip_previous_rounded,
+          onTap: controller.prev,
+          tip: 'Prev',
+        ),
         const SizedBox(width: 6),
         _Btn(
-            icon: Icons.fast_rewind_rounded,
-            onTap: () => controller.seek(
-                (controller.position.value.inSeconds - 5).toDouble()),
-            tip: '-5s'),
+          icon: Icons.fast_rewind_rounded,
+          onTap: () => controller.seek(
+            (controller.position.value.inSeconds - 5).toDouble(),
+          ),
+          tip: '-5s',
+        ),
         const SizedBox(width: 6),
-        Obx(() => _Btn(
-          icon: controller.isPlaying.value
-              ? Icons.pause_rounded : Icons.play_arrow_rounded,
-          onTap: controller.togglePlay,
-          isPrimary: true,
-          tip: controller.isPlaying.value ? 'Pause' : 'Play',
-        )),
-        const SizedBox(width: 6),
-        _Btn(icon: Icons.stop_rounded,
-            onTap: controller.stopTrack, tip: 'Stop'),
+        Obx(
+          () => _Btn(
+            icon: controller.isPlaying.value
+                ? Icons.pause_rounded
+                : Icons.play_arrow_rounded,
+            onTap: controller.togglePlay,
+            isPrimary: true,
+            tip: controller.isPlaying.value ? 'Pause' : 'Play',
+          ),
+        ),
         const SizedBox(width: 6),
         _Btn(
-            icon: Icons.fast_forward_rounded,
-            onTap: () => controller.seek(
-                (controller.position.value.inSeconds + 5).toDouble()),
-            tip: '+5s'),
+          icon: Icons.stop_rounded,
+          onTap: controller.stopTrack,
+          tip: 'Stop',
+        ),
         const SizedBox(width: 6),
-        _Btn(icon: Icons.skip_next_rounded,
-            onTap: controller.next, tip: 'Next'),
+        _Btn(
+          icon: Icons.fast_forward_rounded,
+          onTap: () => controller.seek(
+            (controller.position.value.inSeconds + 5).toDouble(),
+          ),
+          tip: '+5s',
+        ),
+        const SizedBox(width: 6),
+        _Btn(
+          icon: Icons.skip_next_rounded,
+          onTap: controller.next,
+          tip: 'Next',
+        ),
         const Spacer(),
         _Btn(
           icon: Icons.folder_open_rounded,
@@ -577,29 +695,49 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
 
   Widget _volBalRow() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 14),
-    child: Row(children: [
-      Icon(Icons.volume_up_rounded,
-          color: AppRawColors.cyan.withOpacity(0.45), size: 14),
-      Expanded(
-        flex: 3,
-        child: _ThinSlider(value: controller.player.volume, onChanged: (v) async {
-          await controller.player.setVolume(v);
-          setState(() {});
-        },
-            color: AppRawColors.cyan, label: 'VOL'),
-      ),
-      const SizedBox(width: 10),
-      Icon(Icons.tune_rounded,
-          color: AppRawColors.violet.withOpacity(0.45), size: 14),
-      Expanded(
-        flex: 2,
-        child: _ThinSlider(
-            value: 0.5,
-            onChanged: (v) {
+    child: Row(
+      children: [
+        Icon(
+          Icons.volume_up_rounded,
+          color: AppRawColors.cyan.withOpacity(0.45),
+          size: 14,
+        ),
+        Expanded(
+          flex: 3,
+          child: _ThinSlider(
+            value: controller.player.volume,
+            onChanged: (v) async {
+              await controller.player.setVolume(v);
+              setState(() {});
             },
-            color: AppRawColors.violet, label: 'BAL'),
-      ),
-    ]),
+            color: AppRawColors.cyan,
+            label: 'VOL',
+          ),
+        ),
+        const SizedBox(width: 10),
+        Icon(
+          Icons.tune_rounded,
+          color: AppRawColors.violet.withOpacity(0.45),
+          size: 14,
+        ),
+        Expanded(
+          flex: 2,
+          child: _ThinSlider(
+            max: 2,
+            min: 0,
+            value: controller.player.balance + 1,
+            onChanged: (v) async {
+              await controller.player.setBalance(
+                v - 1,
+              ); // -1 left, 1 right, 0 center
+              setState(() {});
+            },
+            color: AppRawColors.violet,
+            label: 'BAL',
+          ),
+        ),
+      ],
+    ),
   );
 
   // ══════════════════════════════════════════════════════════
@@ -608,11 +746,13 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
 
   Widget _playlistWindow() => Container(
     color: _FC.panelBg,
-    child: Column(children: [
-      _playlistHeader(),
-      Expanded(child: _tab == 0 ? _localBody() : _radioBody()),
-      _playlistFooter(),
-    ]),
+    child: Column(
+      children: [
+        _playlistHeader(),
+        Expanded(child: _tab == 0 ? _localBody() : _radioBody()),
+        _playlistFooter(),
+      ],
+    ),
   );
 
   // ── Header with tab switcher ───────────────────────────────
@@ -623,51 +763,57 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       decoration: BoxDecoration(
         color: _FC.headerBg,
         borderRadius: const BorderRadius.only(
-          bottomLeft:  Radius.circular(_FC.rMd),
+          bottomLeft: Radius.circular(_FC.rMd),
           bottomRight: Radius.circular(_FC.rMd),
         ),
         border: Border.all(color: _FC.border),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Row(children: [
-        // ── LOCAL tab ───────────────────────────────────────
-        _TabBtn(
-          label: 'LOCAL',
-          icon: Icons.queue_music_rounded,
-          active: _tab == 0,
-          color: AppRawColors.cyan,
-          onTap: () {
-            if (_tab != 0) setState(() => _tab = 0);
-          },
-        ),
-        const SizedBox(width: 6),
-        // ── RADIO tab ───────────────────────────────────────
-        _TabBtn(
-          label: 'RADIO',
-          icon: Icons.radio_rounded,
-          active: _tab == 1,
-          color: _FC.radioAccent,
-          onTap: () {
-            if (_tab != 1) {
-              setState(() => _tab = 1);
-              _radioListAnim..reset()..forward();
-              // Fetch fresh data when user opens the tab
-              if (controller.radioPlaylist.isEmpty) {
-                controller.fetchRadioSongs();
+      child: Row(
+        children: [
+          // ── LOCAL tab ───────────────────────────────────────
+          _TabBtn(
+            label: 'LOCAL',
+            icon: Icons.queue_music_rounded,
+            active: _tab == 0,
+            color: AppRawColors.cyan,
+            onTap: () {
+              if (_tab != 0) setState(() => _tab = 0);
+            },
+          ),
+          const SizedBox(width: 6),
+          // ── RADIO tab ───────────────────────────────────────
+          _TabBtn(
+            label: 'RADIO',
+            icon: Icons.radio_rounded,
+            active: _tab == 1,
+            color: _FC.radioAccent,
+            onTap: () {
+              if (_tab != 1) {
+                setState(() => _tab = 1);
+                _radioListAnim
+                  ..reset()
+                  ..forward();
+                // Fetch fresh data when user opens the tab
+                if (controller.radioPlaylist.isEmpty) {
+                  controller.fetchRadioSongs();
+                }
               }
-            }
-          },
-        ),
-        const Spacer(),
-        // Track count badge
-        Obx(() {
-          final n = _tab == 0
-              ? controller.playlist.length
-              : controller.radioPlaylist.length;
-          return _CountBadge(n,
-              color: _tab == 0 ? AppRawColors.cyan : _FC.radioAccent);
-        }),
-      ]),
+            },
+          ),
+          const Spacer(),
+          // Track count badge
+          Obx(() {
+            final n = _tab == 0
+                ? controller.playlist.length
+                : controller.radioPlaylist.length;
+            return _CountBadge(
+              n,
+              color: _tab == 0 ? AppRawColors.cyan : _FC.radioAccent,
+            );
+          }),
+        ],
+      ),
     );
   }
 
@@ -687,7 +833,8 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       itemBuilder: (ctx, i) {
         final file = controller.playlist[i];
         return Obx(() {
-          final isCurrent = !controller.isRadioMode.value &&
+          final isCurrent =
+              !controller.isRadioMode.value &&
               controller.currentIndex.value == i;
           return _PlaylistRow(
             key: ValueKey(file.path),
@@ -695,8 +842,10 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
             listAnim: _listAnim,
             shimmerAnim: _shimmerAnim,
             filename: p.basenameWithoutExtension(file.path),
-            extension: p.extension(file.path)
-                .replaceFirst('.', '').toUpperCase(),
+            extension: p
+                .extension(file.path)
+                .replaceFirst('.', '')
+                .toUpperCase(),
             isCurrent: isCurrent,
             showEffects: !_isAndroidTier,
             onTap: () => controller.playIndex(i),
@@ -711,18 +860,28 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
   Widget _radioBody() => Obx(() {
     if (controller.isLoading.value && controller.radioPlaylist.isEmpty) {
       return Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          SizedBox(
-            width: 32, height: 32,
-            child: CircularProgressIndicator(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: _FC.radioAccent),
-          ),
-          const SizedBox(height: 14),
-          Text('Fetching Suno AI radio…',
-              style: TextStyle(fontFamily: _FC.font, fontSize: 12,
-                  color: _FC.radioAccent.withOpacity(0.7))),
-        ]),
+                color: _FC.radioAccent,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'Fetching Suno AI radio…',
+              style: TextStyle(
+                fontFamily: _FC.font,
+                fontSize: 12,
+                color: _FC.radioAccent.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
       );
     }
 
@@ -741,7 +900,8 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       itemBuilder: (ctx, i) {
         final song = controller.radioPlaylist[i];
         return Obx(() {
-          final isCurrent = controller.isRadioMode.value &&
+          final isCurrent =
+              controller.isRadioMode.value &&
               controller.currentIndex.value == i;
           return _RadioRow(
             key: ValueKey(song.songId),
@@ -769,16 +929,32 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
   }) {
     final c = color ?? AppRawColors.cyan;
     return Center(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, color: c.withOpacity(0.18), size: 52),
-        const SizedBox(height: 14),
-        Text(title, style: TextStyle(fontFamily: _FC.font, fontSize: 14,
-            fontWeight: FontWeight.w600, color: c.withOpacity(0.32))),
-        const SizedBox(height: 6),
-        Text(hint, textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: _FC.font, fontSize: 11,
-                color: AppRawColors.darkTextSecondary.withOpacity(0.4))),
-      ]),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: c.withOpacity(0.18), size: 52),
+          const SizedBox(height: 14),
+          Text(
+            title,
+            style: TextStyle(
+              fontFamily: _FC.font,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: c.withOpacity(0.32),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            hint,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: _FC.font,
+              fontSize: 11,
+              color: AppRawColors.darkTextSecondary.withOpacity(0.4),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -790,7 +966,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       decoration: BoxDecoration(
         color: _FC.headerBg,
         borderRadius: const BorderRadius.only(
-          topLeft:  Radius.circular(_FC.rMd),
+          topLeft: Radius.circular(_FC.rMd),
           topRight: Radius.circular(_FC.rMd),
         ),
         border: Border.all(color: _FC.border),
@@ -800,86 +976,124 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
     );
   }
 
-  Widget _localFooterContent() => Row(children: [
-    _FBtn(label: 'Add files',
-        icon: Icons.audiotrack_rounded, onTap: _pickFiles),
-    const SizedBox(width: 8),
-    _FBtn(label: 'Add folder',
-        icon: Icons.folder_rounded, onTap: _pickDirectory),
-    const SizedBox(width: 8),
-    _FBtn(label: 'Clear', icon: Icons.delete_sweep_rounded,
+  Widget _localFooterContent() => Row(
+    children: [
+      _FBtn(
+        label: 'Add files',
+        icon: Icons.audiotrack_rounded,
+        onTap: _pickFiles,
+      ),
+      const SizedBox(width: 8),
+      _FBtn(
+        label: 'Add folder',
+        icon: Icons.folder_rounded,
+        onTap: _pickDirectory,
+      ),
+      const SizedBox(width: 8),
+      _FBtn(
+        label: 'Clear',
+        icon: Icons.delete_sweep_rounded,
         color: AppRawColors.red,
         onTap: () {
           controller.stopTrack();
           controller.playlist.clear();
           controller.currentIndex.value = -1;
-        }),
-    const Spacer(),
-    Obx(() => Text(_fmt(controller.duration.value),
-        style: TextStyle(fontFamily: _FC.font, fontSize: 10,
-            fontWeight: FontWeight.w600, color: AppRawColors.neonGreen))),
-  ]);
-
-  Widget _radioFooterContent() => Row(children: [
-    // Refresh button
-    _FBtn(
-      label: 'Refresh',
-      icon: Icons.refresh_rounded,
-      color: _FC.radioAccent,
-      onTap: () {
-        controller.fetchRadioSongs();
-        _radioListAnim..reset()..forward();
-      },
-    ),
-    const SizedBox(width: 8),
-    // Suno AI branding badge
-    Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(_FC.rSm),
-        gradient: LinearGradient(
-          colors: [
-            _FC.radioAccent.withOpacity(0.18),
-            AppRawColors.cyan.withOpacity(0.10),
-          ],
-        ),
-        border: Border.all(color: _FC.radioAccent.withOpacity(0.30)),
+        },
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.auto_awesome_rounded,
-            size: 11, color: _FC.radioAccent),
-        const SizedBox(width: 4),
-        Text('Powered by Suno AI',
-            style: TextStyle(fontFamily: _FC.font, fontSize: 9,
-                fontWeight: FontWeight.w600,
-                color: _FC.radioAccent.withOpacity(0.85))),
-      ]),
-    ),
-    const Spacer(),
-    // Download progress indicator (global)
-    Obx(() {
-      if (!controller.isDownloading.value) return const SizedBox.shrink();
-      return Row(mainAxisSize: MainAxisSize.min, children: [
-        SizedBox(
-          width: 14, height: 14,
-          child: CircularProgressIndicator(
-            value: controller.downloadProgress.value > 0
-                ? controller.downloadProgress.value : null,
-            strokeWidth: 2,
+      const Spacer(),
+      Obx(
+        () => Text(
+          _fmt(controller.duration.value),
+          style: TextStyle(
+            fontFamily: _FC.font,
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
             color: AppRawColors.neonGreen,
           ),
         ),
-        const SizedBox(width: 6),
-        Text(
-          controller.downloadProgress.value > 0
-              ? '${(controller.downloadProgress.value * 100).toInt()}%'
-              : 'Downloading…',
-          style: TextStyle(fontFamily: _FC.font, fontSize: 10,
-              color: AppRawColors.neonGreen),
+      ),
+    ],
+  );
+
+  Widget _radioFooterContent() => Row(
+    children: [
+      // Refresh button
+      _FBtn(
+        label: 'Refresh',
+        icon: Icons.refresh_rounded,
+        color: _FC.radioAccent,
+        onTap: () {
+          controller.fetchRadioSongs();
+          _radioListAnim
+            ..reset()
+            ..forward();
+        },
+      ),
+      const SizedBox(width: 8),
+      // Suno AI branding badge
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(_FC.rSm),
+          gradient: LinearGradient(
+            colors: [
+              _FC.radioAccent.withOpacity(0.18),
+              AppRawColors.cyan.withOpacity(0.10),
+            ],
+          ),
+          border: Border.all(color: _FC.radioAccent.withOpacity(0.30)),
         ),
-      ]);
-    }),
-  ]);
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.auto_awesome_rounded, size: 11, color: _FC.radioAccent),
+            const SizedBox(width: 4),
+            Text(
+              'Powered by Suno AI',
+              style: TextStyle(
+                fontFamily: _FC.font,
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                color: _FC.radioAccent.withOpacity(0.85),
+              ),
+            ),
+          ],
+        ),
+      ),
+      const Spacer(),
+      // Download progress indicator (global)
+      Obx(() {
+        if (!controller.isDownloading.value) return const SizedBox.shrink();
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                value: controller.downloadProgress.value > 0
+                    ? controller.downloadProgress.value
+                    : null,
+                strokeWidth: 2,
+                color: AppRawColors.neonGreen,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              controller.downloadProgress.value > 0
+                  ? '${(controller.downloadProgress.value * 100).toInt()}%'
+                  : 'Downloading…',
+              style: TextStyle(
+                fontFamily: _FC.font,
+                fontSize: 10,
+                color: AppRawColors.neonGreen,
+              ),
+            ),
+          ],
+        );
+      }),
+    ],
+  );
 
   // ══════════════════════════════════════════════════════════
   //  PERMISSION-AWARE FILE PICKERS  (unchanged from v2.0)
@@ -895,17 +1109,22 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
         if (!status.isGranted) {
           final legacyStatus = await Permission.storage.request();
           if (!legacyStatus.isGranted) {
-            _snack('Permission denied',
-                'Storage permission is required to read audio files.',
-                err: true);
+            _snack(
+              'Permission denied',
+              'Storage permission is required to read audio files.',
+              err: true,
+            );
             return false;
           }
           return true;
         }
       } else if (status.isPermanentlyDenied) {
-        _snack('Permission required',
-            'Please enable storage access in app Settings.',
-            err: true, settingsBtn: true);
+        _snack(
+          'Permission required',
+          'Please enable storage access in app Settings.',
+          err: true,
+          settingsBtn: true,
+        );
         return false;
       }
     }
@@ -920,35 +1139,46 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       String? dirPath = await FilePicker.platform.getDirectoryPath();
       if (dirPath == null) return;
       if (dirPath.startsWith('content://')) {
-        _snack('Android Limitation',
-            'Android security prevents reading folders directly. '
-                'Please use "Add Files" and select multiple files instead.',
-            err: true);
+        _snack(
+          'Android Limitation',
+          'Android security prevents reading folders directly. '
+              'Please use "Add Files" and select multiple files instead.',
+          err: true,
+        );
         return;
       }
       controller.isLoading.value = true;
-      final entities = await Directory(dirPath)
-          .list(recursive: false).toList();
+      final entities = await Directory(dirPath).list(recursive: false).toList();
       const exts = ['.mp3', '.m4a', '.wav', '.flac', '.ogg', '.aac'];
       final files = entities
           .whereType<File>()
           .where((f) => exts.contains(p.extension(f.path).toLowerCase()))
           .toList();
       if (files.isEmpty) {
-        _snack('No Music Found',
-            'No supported audio files were found in this folder.');
+        _snack(
+          'No Music Found',
+          'No supported audio files were found in this folder.',
+        );
       } else {
-        files.sort((a, b) => p.basename(a.path).toLowerCase()
-            .compareTo(p.basename(b.path).toLowerCase()));
+        files.sort(
+          (a, b) => p
+              .basename(a.path)
+              .toLowerCase()
+              .compareTo(p.basename(b.path).toLowerCase()),
+        );
         controller.playlist.assignAll(files);
-        _listAnim..reset()..forward();
+        _listAnim
+          ..reset()
+          ..forward();
         // Switch to local tab automatically
         if (_tab != 0) setState(() => _tab = 0);
       }
     } catch (e) {
-      _snack('Folder Error',
-          'Could not read directory. This is often due to system security settings.',
-          err: true);
+      _snack(
+        'Folder Error',
+        'Could not read directory. This is often due to system security settings.',
+        err: true,
+      );
     } finally {
       controller.isLoading.value = false;
     }
@@ -968,17 +1198,26 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       final files = result.paths.whereType<String>().map(File.new).toList();
       controller.playlist.addAll(files);
       controller.playlist.sort(
-              (a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
-      _listAnim..reset()..forward();
+        (a, b) => p.basename(a.path).compareTo(p.basename(b.path)),
+      );
+      _listAnim
+        ..reset()
+        ..forward();
       if (_tab != 0) setState(() => _tab = 0);
     } catch (e) {
       _snack('Error picking files', e.toString(), err: true);
     }
   }
 
-  void _snack(String title, String msg,
-      {bool err = false, bool settingsBtn = false}) {
-    Get.snackbar(title, msg,
+  void _snack(
+    String title,
+    String msg, {
+    bool err = false,
+    bool settingsBtn = false,
+  }) {
+    Get.snackbar(
+      title,
+      msg,
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: err
           ? AppRawColors.red.withOpacity(0.88)
@@ -988,9 +1227,12 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       margin: const EdgeInsets.all(12),
       mainButton: settingsBtn
           ? TextButton(
-          onPressed: openAppSettings,
-          child: const Text('Settings',
-              style: TextStyle(color: AppRawColors.cyan)))
+              onPressed: openAppSettings,
+              child: const Text(
+                'Settings',
+                style: TextStyle(color: AppRawColors.cyan),
+              ),
+            )
           : null,
     );
   }
@@ -1041,19 +1283,27 @@ class _TabBtn extends StatelessWidget {
             color: active ? color.withOpacity(0.40) : Colors.transparent,
           ),
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 13,
-              color: active ? color : color.withOpacity(0.35)),
-          const SizedBox(width: 5),
-          Text(label,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 13,
+              color: active ? color : color.withOpacity(0.35),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              label,
               style: TextStyle(
                 fontFamily: _FC.font,
                 fontSize: 11,
                 fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                 color: active ? color : color.withOpacity(0.38),
                 letterSpacing: 1.0,
-              )),
-        ]),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1098,7 +1348,9 @@ class _RadioRowState extends State<_RadioRow>
   void initState() {
     super.initState();
     _bounce = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 240));
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+    );
   }
 
   @override
@@ -1110,13 +1362,16 @@ class _RadioRowState extends State<_RadioRow>
   }
 
   @override
-  void dispose() { _bounce.dispose(); super.dispose(); }
+  void dispose() {
+    _bounce.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     // Staggered slide-in entrance (same formula as local rows)
     final delay = (widget.index * 0.04).clamp(0.0, 0.72);
-    final end   = (delay + 0.28).clamp(0.0, 1.0);
+    final end = (delay + 0.28).clamp(0.0, 1.0);
     final slide = CurvedAnimation(
       parent: widget.listAnim,
       curve: Interval(delay, end, curve: Curves.easeOutCubic),
@@ -1125,10 +1380,11 @@ class _RadioRowState extends State<_RadioRow>
     return AnimatedBuilder(
       animation: Listenable.merge([slide, _bounce, widget.shimmerAnim]),
       builder: (ctx, _) {
-        final sv      = slide.value;
-        final bv      = _bounce.value;
+        final sv = slide.value;
+        final bv = _bounce.value;
         final shimmer = widget.isCurrent && widget.showEffects
-            ? widget.shimmerAnim.value : 0.0;
+            ? widget.shimmerAnim.value
+            : 0.0;
 
         return Transform.translate(
           offset: Offset(28.0 * (1.0 - sv), 0),
@@ -1138,14 +1394,18 @@ class _RadioRowState extends State<_RadioRow>
               scale: widget.isCurrent ? (1.0 + bv * 0.016) : 1.0,
               child: MouseRegion(
                 onEnter: (_) => setState(() => _hovered = true),
-                onExit:  (_) => setState(() => _hovered = false),
+                onExit: (_) => setState(() => _hovered = false),
                 child: GestureDetector(
                   onTap: widget.onTap,
                   child: Container(
                     margin: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 8),
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(_FC.rSm),
                       color: widget.isCurrent
@@ -1162,74 +1422,87 @@ class _RadioRowState extends State<_RadioRow>
                       ),
                       gradient: widget.showEffects && widget.isCurrent
                           ? LinearGradient(
-                        begin: Alignment(shimmer * 2.2 - 1.0, 0),
-                        end:   Alignment(shimmer * 2.2 + 0.6, 0),
-                        colors: [
-                          Colors.transparent,
-                          _FC.radioAccent.withOpacity(0.06),
-                          Colors.transparent,
-                        ],
-                      )
+                              begin: Alignment(shimmer * 2.2 - 1.0, 0),
+                              end: Alignment(shimmer * 2.2 + 0.6, 0),
+                              colors: [
+                                Colors.transparent,
+                                _FC.radioAccent.withOpacity(0.06),
+                                Colors.transparent,
+                              ],
+                            )
                           : null,
                     ),
-                    child: Row(children: [
-                      // Cover art thumbnail
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(_FC.rXs),
-                        child: widget.song.imageUrl.isNotEmpty
-                            ? Image.network(
-                          widget.song.imageUrl,
-                          width: 38, height: 38,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              _radioIndexBox(widget.index),
-                        )
-                            : _radioIndexBox(widget.index),
-                      ),
-                      const SizedBox(width: 10),
-                      // Title + style + duration
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(widget.song.title,
+                    child: Row(
+                      children: [
+                        // Cover art thumbnail
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(_FC.rXs),
+                          child: widget.song.imageUrl.isNotEmpty
+                              ? Image.network(
+                                  widget.song.imageUrl,
+                                  width: 38,
+                                  height: 38,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      _radioIndexBox(widget.index),
+                                )
+                              : _radioIndexBox(widget.index),
+                        ),
+                        const SizedBox(width: 10),
+                        // Title + style + duration
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                widget.song.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontFamily: _FC.font,
                                   fontSize: 12,
                                   fontWeight: widget.isCurrent
-                                      ? FontWeight.w600 : FontWeight.w400,
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
                                   color: widget.isCurrent
                                       ? Colors.white
                                       : AppRawColors.darkTextPrimary,
-                                )),
-                            const SizedBox(height: 3),
-                            Row(children: [
-                              _Tag(
-                                  label: widget.song.winningStyle.length > 18
-                                      ? '${widget.song.winningStyle.substring(0, 16)}…'
-                                      : widget.song.winningStyle,
-                                  color: _FC.radioAccent),
-                              const SizedBox(width: 5),
-                              _Tag(
-                                  label: _fmtSec(widget.song.duration),
-                                  color: AppRawColors.cyan),
-                            ]),
-                          ],
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Row(
+                                children: [
+                                  _Tag(
+                                    label: widget.song.winningStyle.length > 18
+                                        ? '${widget.song.winningStyle.substring(0, 16)}…'
+                                        : widget.song.winningStyle,
+                                    color: _FC.radioAccent,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  _Tag(
+                                    label: _fmtSec(widget.song.duration),
+                                    color: AppRawColors.cyan,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      // Currently playing indicator
-                      if (widget.isCurrent) ...[
+                        // Currently playing indicator
+                        if (widget.isCurrent) ...[
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.bar_chart_rounded,
+                            size: 13,
+                            color: AppRawColors.neonGreen,
+                          ),
+                        ],
                         const SizedBox(width: 6),
-                        Icon(Icons.bar_chart_rounded,
-                            size: 13, color: AppRawColors.neonGreen),
+                        // Download button
+                        _DownloadBtn(onTap: widget.onDownload),
                       ],
-                      const SizedBox(width: 6),
-                      // Download button
-                      _DownloadBtn(onTap: widget.onDownload),
-                    ]),
+                    ),
                   ),
                 ),
               ),
@@ -1241,17 +1514,23 @@ class _RadioRowState extends State<_RadioRow>
   }
 
   Widget _radioIndexBox(int i) => Container(
-    width: 38, height: 38,
+    width: 38,
+    height: 38,
     alignment: Alignment.center,
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(_FC.rXs),
       color: _FC.radioAccent.withOpacity(0.10),
       border: Border.all(color: _FC.radioAccent.withOpacity(0.24)),
     ),
-    child: Text('${i + 1}',
-        style: TextStyle(fontFamily: _FC.font, fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: _FC.radioAccent)),
+    child: Text(
+      '${i + 1}',
+      style: TextStyle(
+        fontFamily: _FC.font,
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: _FC.radioAccent,
+      ),
+    ),
   );
 
   String _fmtSec(double sec) {
@@ -1266,6 +1545,7 @@ class _RadioRowState extends State<_RadioRow>
 
 class _DownloadBtn extends StatefulWidget {
   final VoidCallback onTap;
+
   const _DownloadBtn({required this.onTap});
 
   @override
@@ -1280,11 +1560,16 @@ class _DownloadBtnState extends State<_DownloadBtn>
   void initState() {
     super.initState();
     _press = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 90));
+      vsync: this,
+      duration: const Duration(milliseconds: 90),
+    );
   }
 
   @override
-  void dispose() { _press.dispose(); super.dispose(); }
+  void dispose() {
+    _press.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1294,7 +1579,10 @@ class _DownloadBtnState extends State<_DownloadBtn>
       message: 'Download',
       child: GestureDetector(
         onTapDown: (_) => _press.forward(),
-        onTapUp:   (_) { _press.reverse(); widget.onTap(); },
+        onTapUp: (_) {
+          _press.reverse();
+          widget.onTap();
+        },
         onTapCancel: () => _press.reverse(),
         child: AnimatedBuilder(
           animation: _press,
@@ -1302,27 +1590,34 @@ class _DownloadBtnState extends State<_DownloadBtn>
             scale: 1.0 - _press.value * 0.08,
             child: Obx(() {
               final downloading = ctrl.isDownloading.value;
-              final progress    = ctrl.downloadProgress.value;
+              final progress = ctrl.downloadProgress.value;
 
               return Container(
-                width: 30, height: 30,
+                width: 30,
+                height: 30,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppRawColors.neonGreen.withOpacity(
-                      0.07 + _press.value * 0.06),
+                    0.07 + _press.value * 0.06,
+                  ),
                   border: Border.all(
-                      color: AppRawColors.neonGreen.withOpacity(0.28)),
+                    color: AppRawColors.neonGreen.withOpacity(0.28),
+                  ),
                 ),
                 child: downloading
                     ? Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: CircularProgressIndicator(
-                      value: progress > 0 ? progress : null,
-                      strokeWidth: 2,
-                      color: AppRawColors.neonGreen,
-                    ))
-                    : Icon(Icons.download_rounded,
-                    size: 15, color: AppRawColors.neonGreen),
+                        padding: const EdgeInsets.all(6),
+                        child: CircularProgressIndicator(
+                          value: progress > 0 ? progress : null,
+                          strokeWidth: 2,
+                          color: AppRawColors.neonGreen,
+                        ),
+                      )
+                    : Icon(
+                        Icons.download_rounded,
+                        size: 15,
+                        color: AppRawColors.neonGreen,
+                      ),
               );
             }),
           ),
@@ -1371,7 +1666,9 @@ class _PlaylistRowState extends State<_PlaylistRow>
   void initState() {
     super.initState();
     _bounce = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 240));
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+    );
   }
 
   @override
@@ -1383,12 +1680,15 @@ class _PlaylistRowState extends State<_PlaylistRow>
   }
 
   @override
-  void dispose() { _bounce.dispose(); super.dispose(); }
+  void dispose() {
+    _bounce.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final delay = (widget.index * 0.04).clamp(0.0, 0.72);
-    final end   = (delay + 0.28).clamp(0.0, 1.0);
+    final end = (delay + 0.28).clamp(0.0, 1.0);
     final slide = CurvedAnimation(
       parent: widget.listAnim,
       curve: Interval(delay, end, curve: Curves.easeOutCubic),
@@ -1397,10 +1697,11 @@ class _PlaylistRowState extends State<_PlaylistRow>
     return AnimatedBuilder(
       animation: Listenable.merge([slide, _bounce, widget.shimmerAnim]),
       builder: (ctx, _) {
-        final sv      = slide.value;
-        final bv      = _bounce.value;
+        final sv = slide.value;
+        final bv = _bounce.value;
         final shimmer = widget.isCurrent && widget.showEffects
-            ? widget.shimmerAnim.value : 0.0;
+            ? widget.shimmerAnim.value
+            : 0.0;
 
         return Transform.translate(
           offset: Offset(28.0 * (1.0 - sv), 0),
@@ -1410,14 +1711,18 @@ class _PlaylistRowState extends State<_PlaylistRow>
               scale: widget.isCurrent ? (1.0 + bv * 0.016) : 1.0,
               child: MouseRegion(
                 onEnter: (_) => setState(() => _hovered = true),
-                onExit:  (_) => setState(() => _hovered = false),
+                onExit: (_) => setState(() => _hovered = false),
                 child: GestureDetector(
                   onTap: widget.onTap,
                   child: Container(
                     margin: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 9),
+                      horizontal: 10,
+                      vertical: 9,
+                    ),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(_FC.rSm),
                       color: widget.isCurrent
@@ -1433,68 +1738,99 @@ class _PlaylistRowState extends State<_PlaylistRow>
                             : Colors.transparent,
                       ),
                       boxShadow: widget.showEffects && widget.isCurrent
-                          ? [BoxShadow(
-                          color: AppRawColors.cyan.withOpacity(
-                              0.04 + shimmer * 0.09),
-                          blurRadius: 12, spreadRadius: 1)]
+                          ? [
+                              BoxShadow(
+                                color: AppRawColors.cyan.withOpacity(
+                                  0.04 + shimmer * 0.09,
+                                ),
+                                blurRadius: 12,
+                                spreadRadius: 1,
+                              ),
+                            ]
                           : null,
                       gradient: widget.showEffects && widget.isCurrent
                           ? LinearGradient(
-                        begin: Alignment(shimmer * 2.2 - 1.0, 0),
-                        end:   Alignment(shimmer * 2.2 + 0.6, 0),
-                        colors: [
-                          Colors.transparent,
-                          AppRawColors.cyan.withOpacity(0.05),
-                          Colors.transparent,
-                        ],
-                      )
+                              begin: Alignment(shimmer * 2.2 - 1.0, 0),
+                              end: Alignment(shimmer * 2.2 + 0.6, 0),
+                              colors: [
+                                Colors.transparent,
+                                AppRawColors.cyan.withOpacity(0.05),
+                                Colors.transparent,
+                              ],
+                            )
                           : null,
                     ),
-                    child: Row(children: [
-                      SizedBox(
-                        width: 26,
-                        child: Text('${widget.index + 1}',
-                            style: TextStyle(fontFamily: _FC.font, fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                color: widget.isCurrent
-                                    ? AppRawColors.cyan
-                                    : AppRawColors.darkTextSecondary
-                                    .withOpacity(0.38))),
-                      ),
-                      SizedBox(
-                        width: 16,
-                        child: widget.isCurrent
-                            ? Icon(Icons.bar_chart_rounded,
-                            size: 13, color: AppRawColors.neonGreen)
-                            : null,
-                      ),
-                      Expanded(
-                        child: Text(widget.filename, maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontFamily: _FC.font, fontSize: 12,
-                                fontWeight: widget.isCurrent
-                                    ? FontWeight.w600 : FontWeight.w400,
-                                color: widget.isCurrent
-                                    ? AppRawColors.darkTextPrimary
-                                    : AppRawColors.darkTextSecondary)),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 5, vertical: 2),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(_FC.rXs),
-                          color: AppRawColors.cyan.withOpacity(0.06),
-                          border: Border.all(
-                              color: AppRawColors.cyan.withOpacity(0.20)),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 26,
+                          child: Text(
+                            '${widget.index + 1}',
+                            style: TextStyle(
+                              fontFamily: _FC.font,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: widget.isCurrent
+                                  ? AppRawColors.cyan
+                                  : AppRawColors.darkTextSecondary.withOpacity(
+                                      0.38,
+                                    ),
+                            ),
+                          ),
                         ),
-                        child: Text(widget.extension,
-                            style: TextStyle(fontFamily: _FC.font, fontSize: 9,
-                                fontWeight: FontWeight.w600,
-                                color: AppRawColors.cyan.withOpacity(0.65),
-                                letterSpacing: 0.4)),
-                      ),
-                    ]),
+                        SizedBox(
+                          width: 16,
+                          child: widget.isCurrent
+                              ? Icon(
+                                  Icons.bar_chart_rounded,
+                                  size: 13,
+                                  color: AppRawColors.neonGreen,
+                                )
+                              : null,
+                        ),
+                        Expanded(
+                          child: Text(
+                            widget.filename,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: _FC.font,
+                              fontSize: 12,
+                              fontWeight: widget.isCurrent
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              color: widget.isCurrent
+                                  ? AppRawColors.darkTextPrimary
+                                  : AppRawColors.darkTextSecondary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(_FC.rXs),
+                            color: AppRawColors.cyan.withOpacity(0.06),
+                            border: Border.all(
+                              color: AppRawColors.cyan.withOpacity(0.20),
+                            ),
+                          ),
+                          child: Text(
+                            widget.extension,
+                            style: TextStyle(
+                              fontFamily: _FC.font,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: AppRawColors.cyan.withOpacity(0.65),
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1513,40 +1849,58 @@ class _PlaylistRowState extends State<_PlaylistRow>
 class _VuMeter extends StatelessWidget {
   final double value;
   final String label;
+
   const _VuMeter({required this.value, required this.label});
 
   @override
   Widget build(BuildContext context) => Column(
     mainAxisAlignment: MainAxisAlignment.center,
     children: [
-      SizedBox(width: 7, height: 32,
-          child: CustomPaint(painter: _VuPainter(value))),
+      SizedBox(
+        width: 7,
+        height: 32,
+        child: CustomPaint(painter: _VuPainter(value)),
+      ),
       const SizedBox(height: 2),
-      Text(label, style: TextStyle(fontFamily: _FC.font, fontSize: 7,
+      Text(
+        label,
+        style: TextStyle(
+          fontFamily: _FC.font,
+          fontSize: 7,
           fontWeight: FontWeight.w700,
-          color: AppRawColors.cyan.withOpacity(0.45))),
+          color: AppRawColors.cyan.withOpacity(0.45),
+        ),
+      ),
     ],
   );
 }
 
 class _VuPainter extends CustomPainter {
   final double value;
+
   const _VuPainter(this.value);
+
   static const int _n = 10;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final segH   = (size.height - (_n - 1) * 2.0) / _n;
+    final segH = (size.height - (_n - 1) * 2.0) / _n;
     final active = (value * _n).round();
     for (int i = 0; i < _n; i++) {
-      final y  = size.height - (i + 1) * segH - i * 2.0;
+      final y = size.height - (i + 1) * segH - i * 2.0;
       final rr = RRect.fromRectAndRadius(
-          Rect.fromLTWH(0, y, size.width, segH), const Radius.circular(2));
+        Rect.fromLTWH(0, y, size.width, segH),
+        const Radius.circular(2),
+      );
       Color c;
-      if (i >= active)      c = _FC.ledOff;
-      else if (i >= _n - 2) c = _FC.ledPeak;
-      else if (i >= _n - 4) c = _FC.ledMid;
-      else                   c = _FC.ledLow;
+      if (i >= active)
+        c = _FC.ledOff;
+      else if (i >= _n - 2)
+        c = _FC.ledPeak;
+      else if (i >= _n - 4)
+        c = _FC.ledMid;
+      else
+        c = _FC.ledLow;
       canvas.drawRRect(rr, Paint()..color = c);
     }
   }
@@ -1562,17 +1916,21 @@ class _VuPainter extends CustomPainter {
 class _EqBar extends StatelessWidget {
   final double value, peak;
   final Color color;
+
   const _EqBar({required this.value, required this.peak, required this.color});
 
   @override
   Widget build(BuildContext context) => SizedBox(
-      width: 6, height: 44,
-      child: CustomPaint(painter: _EqPainter(value, peak, color)));
+    width: 6,
+    height: 44,
+    child: CustomPaint(painter: _EqPainter(value, peak, color)),
+  );
 }
 
 class _EqPainter extends CustomPainter {
   final double value, peak;
   final Color color;
+
   const _EqPainter(this.value, this.peak, this.color);
 
   @override
@@ -1581,19 +1939,27 @@ class _EqPainter extends CustomPainter {
     if (barH > 1) {
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-            Rect.fromLTWH(0, size.height - barH, size.width, barH),
-            const Radius.circular(3)),
-        Paint()..shader = LinearGradient(
-          begin: Alignment.bottomCenter, end: Alignment.topCenter,
-          colors: [color.withOpacity(0.85), color.withOpacity(0.35)],
-        ).createShader(Rect.fromLTWH(0, size.height - barH, size.width, barH)),
+          Rect.fromLTWH(0, size.height - barH, size.width, barH),
+          const Radius.circular(3),
+        ),
+        Paint()
+          ..shader =
+              LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [color.withOpacity(0.85), color.withOpacity(0.35)],
+              ).createShader(
+                Rect.fromLTWH(0, size.height - barH, size.width, barH),
+              ),
       );
     }
     if (peak > 0.03) {
       final py = size.height * (1.0 - peak) - 2;
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-            Rect.fromLTWH(0, py, size.width, 3), const Radius.circular(1.5)),
+          Rect.fromLTWH(0, py, size.width, 3),
+          const Radius.circular(1.5),
+        ),
         Paint()..color = Colors.white.withOpacity(0.72),
       );
     }
@@ -1615,9 +1981,14 @@ class _Btn extends StatefulWidget {
   final Color? color;
   final String? tip;
 
-  const _Btn({required this.icon, required this.onTap,
-    this.isPrimary = false, this.small = false,
-    this.color, this.tip});
+  const _Btn({
+    required this.icon,
+    required this.onTap,
+    this.isPrimary = false,
+    this.small = false,
+    this.color,
+    this.tip,
+  });
 
   @override
   State<_Btn> createState() => _BtnState();
@@ -1627,25 +1998,43 @@ class _BtnState extends State<_Btn> with SingleTickerProviderStateMixin {
   late AnimationController _press;
 
   @override
-  void initState() { super.initState();
-  _press = AnimationController(vsync: this,
-      duration: const Duration(milliseconds: 90)); }
+  void initState() {
+    super.initState();
+    _press = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 90),
+    );
+  }
 
   @override
-  void dispose() { _press.dispose(); super.dispose(); }
+  void dispose() {
+    _press.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final accent = widget.color ?? AppRawColors.cyan;
-    final sz     = widget.isPrimary ? 52.0 : widget.small ? 32.0 : 40.0;
-    final isz    = widget.isPrimary ? 28.0 : widget.small ? 16.0 : 20.0;
-    final r      = widget.isPrimary ? _FC.rLg : _FC.rSm;
+    final sz = widget.isPrimary
+        ? 52.0
+        : widget.small
+        ? 32.0
+        : 40.0;
+    final isz = widget.isPrimary
+        ? 28.0
+        : widget.small
+        ? 16.0
+        : 20.0;
+    final r = widget.isPrimary ? _FC.rLg : _FC.rSm;
 
     return Tooltip(
       message: widget.tip ?? '',
       child: GestureDetector(
         onTapDown: (_) => _press.forward(),
-        onTapUp:   (_) { _press.reverse(); widget.onTap(); },
+        onTapUp: (_) {
+          _press.reverse();
+          widget.onTap();
+        },
         onTapCancel: () => _press.reverse(),
         child: AnimatedBuilder(
           animation: _press,
@@ -1654,21 +2043,30 @@ class _BtnState extends State<_Btn> with SingleTickerProviderStateMixin {
             return Transform.scale(
               scale: 1.0 - v * 0.07,
               child: Container(
-                width: sz, height: sz,
+                width: sz,
+                height: sz,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(r),
-                  color: Color.lerp(_FC.btnBg,
-                      accent.withOpacity(0.18),
-                      v + (widget.isPrimary ? 0.10 : 0)),
+                  color: Color.lerp(
+                    _FC.btnBg,
+                    accent.withOpacity(0.18),
+                    v + (widget.isPrimary ? 0.10 : 0),
+                  ),
                   border: Border.all(
-                    color: Color.lerp(_FC.btnBorder,
-                        accent.withOpacity(0.65), 0.28 + v * 0.5)!,
+                    color: Color.lerp(
+                      _FC.btnBorder,
+                      accent.withOpacity(0.65),
+                      0.28 + v * 0.5,
+                    )!,
                     width: widget.isPrimary ? 1.5 : 1.0,
                   ),
                   boxShadow: (!_isAndroidTier && widget.isPrimary)
-                      ? [BoxShadow(
-                      color: accent.withOpacity(0.18 + v * 0.18),
-                      blurRadius: 14 + v * 6)]
+                      ? [
+                          BoxShadow(
+                            color: accent.withOpacity(0.18 + v * 0.18),
+                            blurRadius: 14 + v * 6,
+                          ),
+                        ]
                       : null,
                 ),
                 child: Icon(widget.icon, size: isz, color: accent),
@@ -1686,24 +2084,35 @@ class _BtnState extends State<_Btn> with SingleTickerProviderStateMixin {
 // ══════════════════════════════════════════════════════════════
 
 class _Tag extends StatelessWidget {
-  final String label; final Color color;
+  final String label;
+  final Color color;
+
   const _Tag({required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
     decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        color: color.withOpacity(0.08),
-        border: Border.all(color: color.withOpacity(0.24))),
-    child: Text(label, style: TextStyle(fontFamily: _FC.font, fontSize: 9,
-        fontWeight: FontWeight.w600, color: color.withOpacity(0.82))),
+      borderRadius: BorderRadius.circular(4),
+      color: color.withOpacity(0.08),
+      border: Border.all(color: color.withOpacity(0.24)),
+    ),
+    child: Text(
+      label,
+      style: TextStyle(
+        fontFamily: _FC.font,
+        fontSize: 9,
+        fontWeight: FontWeight.w600,
+        color: color.withOpacity(0.82),
+      ),
+    ),
   );
 }
 
 class _CountBadge extends StatelessWidget {
   final int count;
   final Color? color;
+
   const _CountBadge(this.count, {this.color});
 
   @override
@@ -1712,35 +2121,52 @@ class _CountBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-          color: c.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(_FC.rSm),
-          border: Border.all(color: c.withOpacity(0.22))),
-      child: Text('$count tracks', style: TextStyle(fontFamily: _FC.font,
-          fontSize: 10, fontWeight: FontWeight.w600, color: c)),
+        color: c.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(_FC.rSm),
+        border: Border.all(color: c.withOpacity(0.22)),
+      ),
+      child: Text(
+        '$count tracks',
+        style: TextStyle(
+          fontFamily: _FC.font,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          color: c,
+        ),
+      ),
     );
   }
 }
 
 class _TimeLabel extends StatelessWidget {
-  final Duration duration; final bool negate;
+  final Duration duration;
+  final bool negate;
+
   const _TimeLabel({required this.duration, this.negate = false});
 
   @override
   Widget build(BuildContext context) {
     final m = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
     final s = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return Text('${negate ? "-" : ""}$m:$s',
-        style: TextStyle(fontFamily: _FC.font, fontSize: 14,
-            fontWeight: FontWeight.w700, color: AppRawColors.neonGreen,
-            letterSpacing: 1.5,
-            shadows: _isDesktopTier
-                ? const [Shadow(color: AppRawColors.neonGreen, blurRadius: 6)]
-                : null));
+    return Text(
+      '${negate ? "-" : ""}$m:$s',
+      style: TextStyle(
+        fontFamily: _FC.font,
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: AppRawColors.neonGreen,
+        letterSpacing: 1.5,
+        shadows: _isDesktopTier
+            ? const [Shadow(color: AppRawColors.neonGreen, blurRadius: 6)]
+            : null,
+      ),
+    );
   }
 }
 
 class _Marquee extends StatefulWidget {
   final String text;
+
   const _Marquee({required this.text});
 
   @override
@@ -1755,20 +2181,30 @@ class _MarqueeState extends State<_Marquee>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this,
-        duration: const Duration(seconds: 14))..repeat();
-    _anim = Tween<double>(begin: 0, end: -1).animate(
-        CurvedAnimation(parent: _ctrl, curve: Curves.linear));
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 14),
+    )..repeat();
+    _anim = Tween<double>(
+      begin: 0,
+      end: -1,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.linear));
   }
 
   @override
   void didUpdateWidget(_Marquee old) {
     super.didUpdateWidget(old);
-    if (old.text != widget.text) { _ctrl.reset(); _ctrl.repeat(); }
+    if (old.text != widget.text) {
+      _ctrl.reset();
+      _ctrl.repeat();
+    }
   }
 
   @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => ClipRect(
@@ -1776,10 +2212,17 @@ class _MarqueeState extends State<_Marquee>
       animation: _anim,
       builder: (_, __) => FractionalTranslation(
         translation: Offset(_anim.value, 0),
-        child: Text(widget.text, maxLines: 1, overflow: TextOverflow.visible,
-            style: TextStyle(fontFamily: _FC.font, fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppRawColors.darkTextPrimary)),
+        child: Text(
+          widget.text,
+          maxLines: 1,
+          overflow: TextOverflow.visible,
+          style: TextStyle(
+            fontFamily: _FC.font,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: AppRawColors.darkTextPrimary,
+          ),
+        ),
       ),
     ),
   );
@@ -1787,40 +2230,67 @@ class _MarqueeState extends State<_Marquee>
 
 class _ThinSlider extends StatelessWidget {
   final double value;
+  final double? max;
+  final double? min;
   final ValueChanged<double> onChanged;
   final Color color;
   final String label;
-  const _ThinSlider({required this.value, required this.onChanged,
-    required this.color, required this.label});
+
+  const _ThinSlider({
+    required this.value,
+    required this.onChanged,
+    required this.color,
+    required this.label,
+    this.max,
+    this.min,
+  });
 
   @override
-  Widget build(BuildContext context) => Row(children: [
-    const SizedBox(width: 4),
-    Text(label, style: TextStyle(fontFamily: _FC.font, fontSize: 9,
-        fontWeight: FontWeight.w600,
-        color: color.withOpacity(0.45), letterSpacing: 0.8)),
-    Expanded(
-      child: SliderTheme(
-        data: SliderTheme.of(context).copyWith(
-          trackHeight: 2,
-          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-          overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-          activeTrackColor: color,
-          inactiveTrackColor: _FC.scrubBg,
-          thumbColor: color,
-          overlayColor: color.withOpacity(0.12),
+  Widget build(BuildContext context) => Row(
+    children: [
+      const SizedBox(width: 4),
+      Text(
+        label,
+        style: TextStyle(
+          fontFamily: _FC.font,
+          fontSize: 9,
+          fontWeight: FontWeight.w600,
+          color: color.withOpacity(0.45),
+          letterSpacing: 0.8,
         ),
-        child: Slider(value: value, onChanged: onChanged),
       ),
-    ),
-  ]);
+      Expanded(
+        child: SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 2,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+            activeTrackColor: color,
+            inactiveTrackColor: _FC.scrubBg,
+            thumbColor: color,
+            overlayColor: color.withOpacity(0.12),
+          ),
+          child: max != null && min != null
+              ? Slider(value: value, max: max!, min: min!, onChanged: onChanged)
+              : Slider(value: value, onChanged: onChanged),
+        ),
+      ),
+    ],
+  );
 }
 
 class _FBtn extends StatelessWidget {
-  final String label; final IconData icon;
-  final VoidCallback onTap; final Color? color;
-  const _FBtn({required this.label, required this.icon,
-    required this.onTap, this.color});
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color? color;
+
+  const _FBtn({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1830,15 +2300,26 @@ class _FBtn extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(_FC.rSm),
-            color: c.withOpacity(0.07),
-            border: Border.all(color: c.withOpacity(0.23))),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 12, color: c),
-          const SizedBox(width: 4),
-          Text(label, style: TextStyle(fontFamily: _FC.font, fontSize: 10,
-              fontWeight: FontWeight.w600, color: c)),
-        ]),
+          borderRadius: BorderRadius.circular(_FC.rSm),
+          color: c.withOpacity(0.07),
+          border: Border.all(color: c.withOpacity(0.23)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: c),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: _FC.font,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: c,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1859,7 +2340,7 @@ class _RoundTrack extends RoundedRectSliderTrackShape {
     bool isEnabled = true,
     bool isDiscrete = false,
   }) {
-    final h   = sliderTheme.trackHeight ?? 3;
+    final h = sliderTheme.trackHeight ?? 3;
     final top = offset.dy + (parentBox.size.height - h) / 2;
     return Rect.fromLTWH(offset.dx + 8, top, parentBox.size.width - 16, h);
   }
@@ -1872,7 +2353,9 @@ class _GlowThumb extends SliderComponentShape {
   Size getPreferredSize(bool e, bool d) => const Size(14, 14);
 
   @override
-  void paint(PaintingContext ctx, Offset center, {
+  void paint(
+    PaintingContext ctx,
+    Offset center, {
     required Animation<double> activationAnimation,
     required Animation<double> enableAnimation,
     required bool isDiscrete,
@@ -1886,12 +2369,19 @@ class _GlowThumb extends SliderComponentShape {
   }) {
     final c = ctx.canvas;
     if (_isDesktopTier) {
-      c.drawCircle(center, 9,
-          Paint()..color = AppRawColors.cyan.withOpacity(0.16)
-            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5));
+      c.drawCircle(
+        center,
+        9,
+        Paint()
+          ..color = AppRawColors.cyan.withOpacity(0.16)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+      );
     }
     c.drawCircle(center, 6, Paint()..color = AppRawColors.cyan);
-    c.drawCircle(center - const Offset(1.5, 1.5), 2,
-        Paint()..color = Colors.white.withOpacity(0.48));
+    c.drawCircle(
+      center - const Offset(1.5, 1.5),
+      2,
+      Paint()..color = Colors.white.withOpacity(0.48),
+    );
   }
 }

@@ -7,6 +7,7 @@
       "name": "music_player",
       "version": "1.0.0+1",
       "dependencies": [
+        "animated_text_kit",
         "audioplayers",
         "cupertino_icons",
         "file_picker",
@@ -44,6 +45,14 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "animated_text_kit",
+      "version": "4.3.0",
+      "dependencies": [
+        "characters",
+        "flutter"
       ]
     },
     {
@@ -226,6 +235,11 @@
         "string_scanner",
         "term_glyph"
       ]
+    },
+    {
+      "name": "characters",
+      "version": "1.4.0",
+      "dependencies": []
     },
     {
       "name": "uuid",
@@ -468,11 +482,6 @@
       "dependencies": [
         "collection"
       ]
-    },
-    {
-      "name": "characters",
-      "version": "1.4.0",
-      "dependencies": []
     },
     {
       "name": "async",
