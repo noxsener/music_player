@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    android/app/src/main/res/xml/file_paths.xml
+
+    Required by the FileProvider declared in AndroidManifest.xml.
+    This tells FileProvider which directories it may share URIs for.
+
+    Create this file at:
+        android/app/src/main/res/xml/file_paths.xml
+    (Create the res/xml/ folder if it doesn't exist yet.)
+-->
+<paths>
+    <!-- Public external storage root (covers /sdcard/ paths) -->
+    <external-path
+        name="external_files"
+        path="." />
+
+    <!-- App-specific external Music/Codenfast folder -->
+    <external-files-path
+        name="codenfast_music"
+        path="Music/Codenfast" />
+
+    <!-- App cache dir (used when copying content:// files for playback) -->
+    <cache-path
+        name="cache"
+        path="." />
+</paths>

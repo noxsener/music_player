@@ -1,1 +1,0 @@
- /home/noxsener/StudioProjects/music_player/.dart_tool/flutter_build/d005592dc6838b285ae66ed6c44a1547/dart_build_result.json:  /home/noxsener/FlutterSDK/bin/cache/dart-sdk/version /home/noxsener/StudioProjects/music_player/.dart_tool/package_config.json /home/noxsener/StudioProjects/music_player/pubspec.yaml
