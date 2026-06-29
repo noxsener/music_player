@@ -1,6 +1,7 @@
 #include "my_application.h"
 
 #include <flutter_linux/flutter_linux.h>
+#include <unistd.h>
 #ifdef GDK_WINDOWING_X11
 #include <gdk/gdkx.h>
 #endif
@@ -45,11 +46,28 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "music_player");
+    gtk_header_bar_set_title(header_bar, "Codenfast Player");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "music_player");
+    gtk_window_set_title(window, "Codenfast Player");
+  }
+
+  // Load app icon from the data directory next to the executable
+  {
+    char exe_buf[4096] = {};
+    ssize_t len = readlink("/proc/self/exe", exe_buf, sizeof(exe_buf) - 1);
+    if (len > 0) {
+      gchar* exe_dir = g_path_get_dirname(exe_buf);
+      gchar* icon_path = g_build_filename(exe_dir, "data", "app_icon.png", nullptr);
+      GdkPixbuf* icon = gdk_pixbuf_new_from_file(icon_path, nullptr);
+      if (icon) {
+        gtk_window_set_icon(window, icon);
+        g_object_unref(icon);
+      }
+      g_free(icon_path);
+      g_free(exe_dir);
+    }
   }
 
   gtk_window_set_default_size(window, 1280, 720);

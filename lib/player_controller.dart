@@ -30,6 +30,8 @@ const allSupportedExts = [
 
 const _intentChannel = MethodChannel('com.codenfast.music_player/intent');
 
+enum PlayerRepeatMode { none, all, one }
+
 class MusicPlayerController extends GetxController {
   final Player player = Player(
     configuration: const PlayerConfiguration(
@@ -53,6 +55,8 @@ class MusicPlayerController extends GetxController {
   final isLoading = false.obs;
   final position = Duration.zero.obs;
   final duration = Duration.zero.obs;
+
+  final repeatMode = PlayerRepeatMode.none.obs;
 
   // ── Download state ─────────────────────────────────────────
   final downloadingSongId = ''.obs;
@@ -103,7 +107,20 @@ class MusicPlayerController extends GetxController {
       (playing) => isPlaying.value = playing,
     );
     _completeSub = player.stream.completed.listen((completed) {
-      if (completed) next();
+      if (!completed) return;
+      final mode = repeatMode.value;
+      if (mode == PlayerRepeatMode.one) {
+        final idx = currentIndex.value;
+        if (isRadioMode.value) playRadioSong(idx); else playIndex(idx);
+      } else {
+        final len = isRadioMode.value ? radioPlaylist.length : playlist.length;
+        final isLast = currentIndex.value >= len - 1;
+        if (mode == PlayerRepeatMode.none && isLast) {
+          stopTrack();
+        } else {
+          next();
+        }
+      }
     });
   }
 
@@ -268,6 +285,14 @@ class MusicPlayerController extends GetxController {
       if (playlist.isEmpty) return;
       playIndex((currentIndex.value - 1 + playlist.length) % playlist.length);
     }
+  }
+
+  void cycleRepeat() {
+    repeatMode.value = switch (repeatMode.value) {
+      PlayerRepeatMode.none => PlayerRepeatMode.all,
+      PlayerRepeatMode.all  => PlayerRepeatMode.one,
+      PlayerRepeatMode.one  => PlayerRepeatMode.none,
+    };
   }
 
   // ─────────────────────────────────────────────────────────

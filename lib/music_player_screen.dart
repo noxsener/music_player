@@ -27,6 +27,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../config/app_theme.dart';
 import '../models/radio_song.dart';
+import '../widgets/codenfast_logo.dart';
 
 // ─────────────────────────────────────────────────────────────
 //  PLATFORM TIER
@@ -215,6 +216,8 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       _timeRow(),
       const SizedBox(height: 6),
       _transportRow(),
+      const SizedBox(height: 4),
+      _utilRow(),
       const SizedBox(height: 6),
       _volBalRow(),
       const SizedBox(height: 12),
@@ -237,16 +240,69 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(children: [
-          Container(width: 8, height: 8, decoration: BoxDecoration(shape: BoxShape.circle, color: AppRawColors.cyan,
-              boxShadow: _isAndroidTier ? null : [BoxShadow(color: AppRawColors.cyan.withOpacity(0.35 + g * 0.45), blurRadius: 7)])),
+          SpeakerIcon(size: 26, glow: g),
           const SizedBox(width: 10),
           Text('CODENFAST PLAYER', style: TextStyle(fontFamily: _FC.font, fontSize: 12, fontWeight: FontWeight.w700, color: AppRawColors.cyan, letterSpacing: 2.2)),
           const Spacer(),
           Text('v3.2', style: TextStyle(fontFamily: _FC.font, fontSize: 10, color: AppRawColors.cyan.withOpacity(0.40), letterSpacing: 1.4)),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: _showAbout,
+            child: Icon(Icons.info_outline_rounded, size: 16, color: AppRawColors.cyan.withOpacity(0.45)),
+          ),
         ]),
       );
     },
   );
+
+  void _showAbout() {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        backgroundColor: const Color(0xFF0C1018),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: AppRawColors.cyan.withOpacity(0.20)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(32, 32, 32, 24),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const CodenfastLogo(iconSize: 100),
+            const SizedBox(height: 6),
+            Text('v3.2', style: TextStyle(fontFamily: _FC.font, fontSize: 11,
+                color: AppRawColors.cyan.withOpacity(0.45), letterSpacing: 1.4)),
+            const SizedBox(height: 20),
+            Divider(color: AppRawColors.cyan.withOpacity(0.12)),
+            const SizedBox(height: 14),
+            Text('© 2024 Codenfast. All Rights Reserved.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontFamily: _FC.font, fontSize: 11,
+                    color: Colors.white.withOpacity(0.45))),
+            const SizedBox(height: 6),
+            const Text('http://codenfast.com',
+                style: TextStyle(fontFamily: _FC.font, fontSize: 11,
+                    color: AppRawColors.cyan,
+                    decoration: TextDecoration.underline,
+                    decorationColor: AppRawColors.cyan)),
+            const SizedBox(height: 18),
+            GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(_FC.rSm),
+                  border: Border.all(color: AppRawColors.cyan.withOpacity(0.30)),
+                  color: AppRawColors.cyan.withOpacity(0.07),
+                ),
+                child: Text('Close', style: TextStyle(fontFamily: _FC.font, fontSize: 11,
+                    fontWeight: FontWeight.w600, color: AppRawColors.cyan)),
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
 
   // ── Track card ─────────────────────────────────────────────
 
@@ -464,6 +520,19 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       _Btn(icon: Icons.fast_forward_rounded, onTap: () => controller.seek((controller.position.value.inSeconds + 5).toDouble()), tip: '+5s'),
       const SizedBox(width: 6),
       _Btn(icon: Icons.skip_next_rounded, onTap: controller.next, tip: 'Next'),
+    ]),
+  );
+
+  Widget _utilRow() => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 10),
+    child: Row(children: [
+      Obx(() {
+        final mode = controller.repeatMode.value;
+        final icon = mode == PlayerRepeatMode.one ? Icons.repeat_one_rounded : Icons.repeat_rounded;
+        final color = mode == PlayerRepeatMode.none ? AppRawColors.cyan.withOpacity(0.28) : AppRawColors.cyan;
+        final tip = switch (mode) { PlayerRepeatMode.none => 'Repeat off', PlayerRepeatMode.all => 'Repeat all', PlayerRepeatMode.one => 'Repeat one' };
+        return _Btn(icon: icon, onTap: controller.cycleRepeat, tip: tip, color: color, small: true);
+      }),
       const Spacer(),
       _Btn(icon: Icons.folder_open_rounded, onTap: _pickDirectory, tip: 'Open folder', color: AppRawColors.amber, small: true),
     ]),
@@ -612,6 +681,21 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
     const SizedBox(width: 8),
     _FBtn(label: 'Clear', icon: Icons.delete_sweep_rounded, color: AppRawColors.red,
         onTap: () { controller.stopTrack(); controller.playlist.clear(); controller.currentIndex.value = -1; }),
+    const SizedBox(width: 8),
+    _FBtn(label: 'Remove', icon: Icons.delete_forever, color: AppRawColors.red,
+        onTap: () {
+      controller.stopTrack();
+      controller.playlist.removeAt(controller.currentIndex.value);
+    if (controller.playlist.isNotEmpty) {
+      if (controller.currentIndex.value >= controller.playlist.length) {
+        controller.currentIndex.value--;
+      } else {
+        controller.currentIndex.value++;
+      }
+    } else {
+      controller.currentIndex.value = -1;
+    }
+    }),
     const Spacer(),
     Obx(() => Text(_fmt(controller.duration.value), style: TextStyle(fontFamily: _FC.font, fontSize: 10, fontWeight: FontWeight.w600, color: AppRawColors.neonGreen))),
   ]);
