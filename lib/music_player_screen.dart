@@ -274,7 +274,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
             const SizedBox(height: 20),
             Divider(color: AppRawColors.cyan.withOpacity(0.12)),
             const SizedBox(height: 14),
-            Text('© 2024 Codenfast. All Rights Reserved.',
+            Text('© 2024 Codenfast. Tüm Hakları Saklıdır.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontFamily: _FC.font, fontSize: 11,
                     color: Colors.white.withOpacity(0.45))),
@@ -294,7 +294,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
                   border: Border.all(color: AppRawColors.cyan.withOpacity(0.30)),
                   color: AppRawColors.cyan.withOpacity(0.07),
                 ),
-                child: Text('Close', style: TextStyle(fontFamily: _FC.font, fontSize: 11,
+                child: Text('Kapat', style: TextStyle(fontFamily: _FC.font, fontSize: 11,
                     fontWeight: FontWeight.w600, color: AppRawColors.cyan)),
               ),
             ),
@@ -322,7 +322,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
         final isVideo  = controller.isVideoMode.value;
         final hasTrack = idx >= 0;
 
-        String trackName = 'No track selected';
+        String trackName = 'Parça seçilmedi';
         String? coverUrl;
         String tag1 = '', tag2 = '', tag3 = '';
         bool showFormatTag = false;
@@ -361,7 +361,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
                 _Tag(label: tag3, color: AppRawColors.violet),
               ] else if (showFormatTag) ...[
                 _Tag(label: formatTag, color: formatColor),
-                if (isVideo) ...[const SizedBox(width: 6), _Tag(label: 'VIDEO', color: AppRawColors.amber)],
+                if (isVideo) ...[const SizedBox(width: 6), _Tag(label: 'VİDEO', color: AppRawColors.amber)],
               ],
             ]),
           ])),
@@ -404,6 +404,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
         controller: _videoController,
         controls: NoVideoControls,
         fit: BoxFit.contain,
+        pauseUponEnteringBackgroundMode: false,
       ),
       // Fullscreen button — bottom-right, small, no backdrop filter
       Positioned(
@@ -509,17 +510,17 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
   Widget _transportRow() => Padding(
     padding: const EdgeInsets.symmetric(horizontal: 10),
     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      _Btn(icon: Icons.skip_previous_rounded, onTap: controller.prev, tip: 'Prev'),
+      _Btn(icon: Icons.skip_previous_rounded, onTap: controller.prev, tip: 'Önceki'),
       const SizedBox(width: 6),
-      _Btn(icon: Icons.fast_rewind_rounded, onTap: () => controller.seek((controller.position.value.inSeconds - 5).toDouble()), tip: '-5s'),
+      _Btn(icon: Icons.fast_rewind_rounded, onTap: () => controller.seek((controller.position.value.inSeconds - 5).toDouble()), tip: '-5sn'),
       const SizedBox(width: 6),
-      Obx(() => _Btn(icon: controller.isPlaying.value ? Icons.pause_rounded : Icons.play_arrow_rounded, onTap: controller.togglePlay, isPrimary: true, tip: controller.isPlaying.value ? 'Pause' : 'Play')),
+      Obx(() => _Btn(icon: controller.isPlaying.value ? Icons.pause_rounded : Icons.play_arrow_rounded, onTap: controller.togglePlay, isPrimary: true, tip: controller.isPlaying.value ? 'Duraklat' : 'Oynat')),
       const SizedBox(width: 6),
-      _Btn(icon: Icons.stop_rounded, onTap: controller.stopTrack, tip: 'Stop'),
+      _Btn(icon: Icons.stop_rounded, onTap: controller.stopTrack, tip: 'Durdur'),
       const SizedBox(width: 6),
-      _Btn(icon: Icons.fast_forward_rounded, onTap: () => controller.seek((controller.position.value.inSeconds + 5).toDouble()), tip: '+5s'),
+      _Btn(icon: Icons.fast_forward_rounded, onTap: () => controller.seek((controller.position.value.inSeconds + 5).toDouble()), tip: '+5sn'),
       const SizedBox(width: 6),
-      _Btn(icon: Icons.skip_next_rounded, onTap: controller.next, tip: 'Next'),
+      _Btn(icon: Icons.skip_next_rounded, onTap: controller.next, tip: 'Sonraki'),
     ]),
   );
 
@@ -530,11 +531,11 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
         final mode = controller.repeatMode.value;
         final icon = mode == PlayerRepeatMode.one ? Icons.repeat_one_rounded : Icons.repeat_rounded;
         final color = mode == PlayerRepeatMode.none ? AppRawColors.cyan.withOpacity(0.28) : AppRawColors.cyan;
-        final tip = switch (mode) { PlayerRepeatMode.none => 'Repeat off', PlayerRepeatMode.all => 'Repeat all', PlayerRepeatMode.one => 'Repeat one' };
+        final tip = switch (mode) { PlayerRepeatMode.none => 'Tekrar kapalı', PlayerRepeatMode.all => 'Tümünü tekrarla', PlayerRepeatMode.one => 'Birini tekrarla' };
         return _Btn(icon: icon, onTap: controller.cycleRepeat, tip: tip, color: color, small: true);
       }),
       const Spacer(),
-      _Btn(icon: Icons.folder_open_rounded, onTap: _pickDirectory, tip: 'Open folder', color: AppRawColors.amber, small: true),
+      _Btn(icon: Icons.folder_open_rounded, onTap: _pickDirectory, tip: 'Klasör aç', color: AppRawColors.amber, small: true),
     ]),
   );
 
@@ -556,7 +557,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
               controller.setVolume(v);
             },
             color: AppRawColors.cyan,
-            label: 'VOL',
+            label: 'SES',
           ),
         ),
         // BAL not available for video (media_kit has no balance API)
@@ -575,7 +576,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
                 controller.setBalance(v - 1);
               },
               color: AppRawColors.violet,
-              label: 'BAL',
+              label: 'DENGE',
             ),
           ),
         ],
@@ -605,9 +606,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
     ),
     padding: const EdgeInsets.symmetric(horizontal: 10),
     child: Row(children: [
-      _TabBtn(label: 'LOCAL', icon: Icons.queue_music_rounded, active: _tab == 0, color: AppRawColors.cyan, onTap: () { if (_tab != 0) setState(() => _tab = 0); }),
+      _TabBtn(label: 'YEREL', icon: Icons.queue_music_rounded, active: _tab == 0, color: AppRawColors.cyan, onTap: () { if (_tab != 0) setState(() => _tab = 0); }),
       const SizedBox(width: 6),
-      _TabBtn(label: 'RADIO', icon: Icons.radio_rounded, active: _tab == 1, color: _FC.radioAccent, onTap: () {
+      _TabBtn(label: 'RADYO', icon: Icons.radio_rounded, active: _tab == 1, color: _FC.radioAccent, onTap: () {
         if (_tab != 1) { setState(() => _tab = 1); _radioListAnim..reset()..forward(); if (controller.radioPlaylist.isEmpty) controller.fetchRadioSongs(); }
       }),
       const Spacer(),
@@ -616,7 +617,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
   );
 
   Widget _localBody() => Obx(() {
-    if (controller.playlist.isEmpty) return _emptyState(icon: Icons.folder_open_rounded, title: 'No tracks loaded', hint: 'Tap "Add folder" or the folder button above');
+    if (controller.playlist.isEmpty) return _emptyState(icon: Icons.folder_open_rounded, title: 'Parça yüklenmedi', hint: '"Klasör Ekle"ye veya yukarıdaki klasör düğmesine dokunun');
     return ListView.builder(
       padding: const EdgeInsets.only(top: 6, bottom: 6),
       itemCount: controller.playlist.length,
@@ -638,10 +639,10 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
         SizedBox(width: 32, height: 32, child: CircularProgressIndicator(strokeWidth: 2, color: _FC.radioAccent)),
         const SizedBox(height: 14),
-        Text('Fetching Suno AI radio…', style: TextStyle(fontFamily: _FC.font, fontSize: 12, color: _FC.radioAccent.withOpacity(0.7))),
+        Text('Suno AI radyosu getiriliyor…', style: TextStyle(fontFamily: _FC.font, fontSize: 12, color: _FC.radioAccent.withOpacity(0.7))),
       ]));
     if (controller.radioPlaylist.isEmpty)
-      return _emptyState(icon: Icons.wifi_off_rounded, title: 'Radio unavailable', hint: 'Could not reach Suno AI stream.\nTap the refresh button.', color: _FC.radioAccent);
+      return _emptyState(icon: Icons.wifi_off_rounded, title: 'Radyo kullanılamıyor', hint: 'Suno AI yayınına ulaşılamadı.\nYenile düğmesine dokunun.', color: _FC.radioAccent);
     return ListView.builder(
       padding: const EdgeInsets.only(top: 6, bottom: 6),
       itemCount: controller.radioPlaylist.length,
@@ -675,14 +676,14 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
   );
 
   Widget _localFooterContent() => Row(children: [
-    _FBtn(label: 'Add files', icon: Icons.audiotrack_rounded, onTap: _pickFiles),
+    _FBtn(label: 'Dosya ekle', icon: Icons.audiotrack_rounded, onTap: _pickFiles),
     const SizedBox(width: 8),
-    _FBtn(label: 'Add folder', icon: Icons.folder_rounded, onTap: _pickDirectory),
+    _FBtn(label: 'Klasör ekle', icon: Icons.folder_rounded, onTap: _pickDirectory),
     const SizedBox(width: 8),
-    _FBtn(label: 'Clear', icon: Icons.delete_sweep_rounded, color: AppRawColors.red,
+    _FBtn(label: 'Temizle', icon: Icons.delete_sweep_rounded, color: AppRawColors.red,
         onTap: () { controller.stopTrack(); controller.playlist.clear(); controller.currentIndex.value = -1; }),
     const SizedBox(width: 8),
-    _FBtn(label: 'Remove', icon: Icons.delete_forever, color: AppRawColors.red,
+    _FBtn(label: 'Kaldır', icon: Icons.delete_forever, color: AppRawColors.red,
         onTap: () {
       controller.stopTrack();
       controller.playlist.removeAt(controller.currentIndex.value);
@@ -701,14 +702,14 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
   ]);
 
   Widget _radioFooterContent() => Row(children: [
-    _FBtn(label: 'Refresh', icon: Icons.refresh_rounded, color: _FC.radioAccent, onTap: () { controller.fetchRadioSongs(); _radioListAnim..reset()..forward(); }),
+    _FBtn(label: 'Yenile', icon: Icons.refresh_rounded, color: _FC.radioAccent, onTap: () { controller.fetchRadioSongs(); _radioListAnim..reset()..forward(); }),
     const SizedBox(width: 8),
     Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(_FC.rSm), gradient: LinearGradient(colors: [_FC.radioAccent.withOpacity(0.18), AppRawColors.cyan.withOpacity(0.10)]), border: Border.all(color: _FC.radioAccent.withOpacity(0.30))),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(Icons.auto_awesome_rounded, size: 11, color: _FC.radioAccent), const SizedBox(width: 4),
-        Text('Powered by Suno AI', style: TextStyle(fontFamily: _FC.font, fontSize: 9, fontWeight: FontWeight.w600, color: _FC.radioAccent.withOpacity(0.85))),
+        Text('Suno AI ile çalışır', style: TextStyle(fontFamily: _FC.font, fontSize: 9, fontWeight: FontWeight.w600, color: _FC.radioAccent.withOpacity(0.85))),
       ]),
     ),
     const Spacer(),
@@ -717,7 +718,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       return Row(mainAxisSize: MainAxisSize.min, children: [
         SizedBox(width: 14, height: 14, child: CircularProgressIndicator(value: controller.downloadProgress.value > 0 ? controller.downloadProgress.value : null, strokeWidth: 2, color: AppRawColors.neonGreen)),
         const SizedBox(width: 6),
-        Text(controller.downloadProgress.value > 0 ? '${(controller.downloadProgress.value * 100).toInt()}%' : 'Downloading…',
+        Text(controller.downloadProgress.value > 0 ? '${(controller.downloadProgress.value * 100).toInt()}%' : 'İndiriliyor…',
             style: TextStyle(fontFamily: _FC.font, fontSize: 10, color: AppRawColors.neonGreen)),
       ]);
     }),
@@ -733,11 +734,11 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
         status = await Permission.audio.request();
         if (!status.isGranted) {
           final legacy = await Permission.storage.request();
-          if (!legacy.isGranted) { _snack('Permission denied', 'Storage permission is required.', err: true); return false; }
+          if (!legacy.isGranted) { _snack('İzin reddedildi', 'Depolama izni gerekli.', err: true); return false; }
           return true;
         }
       } else if (status.isPermanentlyDenied) {
-        _snack('Permission required', 'Enable storage in app Settings.', err: true, settingsBtn: true);
+        _snack('İzin gerekli', 'Uygulama ayarlarından depolamayı etkinleştirin.', err: true, settingsBtn: true);
         return false;
       }
     }
@@ -749,13 +750,13 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
     try {
       final dirPath = await FilePicker.platform.getDirectoryPath();
       if (dirPath == null) return;
-      if (dirPath.startsWith('content://')) { _snack('Android Limitation', 'Use "Add Files" to select multiple files instead.', err: true); return; }
+      if (dirPath.startsWith('content://')) { _snack('Android Kısıtlaması', 'Bunun yerine birden fazla dosya seçmek için "Dosya Ekle"yi kullanın.', err: true); return; }
       controller.isLoading.value = true;
       final entities = await Directory(dirPath).list(recursive: false).toList();
       final exts = {'.mp3', '.m4a', '.wav', '.flac', '.ogg', '.aac', '.mp4', '.mkv', '.mov', '.avi', '.webm', '.m4v'};
       final files = entities.whereType<File>().where((f) => exts.contains(p.extension(f.path).toLowerCase())).toList();
       if (files.isEmpty) {
-        _snack('No Media Found', 'No supported audio/video files in this folder.');
+        _snack('Medya Bulunamadı', 'Bu klasörde desteklenen ses/video dosyası yok.');
       } else {
         files.sort((a, b) => p.basename(a.path).toLowerCase().compareTo(p.basename(b.path).toLowerCase()));
         controller.playlist.assignAll(files);
@@ -763,7 +764,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
         if (_tab != 0) setState(() => _tab = 0);
       }
     } catch (_) {
-      _snack('Folder Error', 'Could not read directory.', err: true);
+      _snack('Klasör Hatası', 'Dizin okunamadı.', err: true);
     } finally {
       controller.isLoading.value = false;
     }
@@ -779,14 +780,14 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen>
       controller.playlist.sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
       _listAnim..reset()..forward();
       if (_tab != 0) setState(() => _tab = 0);
-    } catch (e) { _snack('Error picking files', e.toString(), err: true); }
+    } catch (e) { _snack('Dosya seçme hatası', e.toString(), err: true); }
   }
 
   void _snack(String title, String msg, {bool err = false, bool settingsBtn = false}) {
     Get.snackbar(title, msg, snackPosition: SnackPosition.BOTTOM,
         backgroundColor: err ? AppRawColors.red.withOpacity(0.88) : AppRawColors.darkSurfaceRaised,
         colorText: Colors.white, borderRadius: _FC.rMd, margin: const EdgeInsets.all(12),
-        mainButton: settingsBtn ? TextButton(onPressed: openAppSettings, child: const Text('Settings', style: TextStyle(color: AppRawColors.cyan))) : null);
+        mainButton: settingsBtn ? TextButton(onPressed: openAppSettings, child: const Text('Ayarlar', style: TextStyle(color: AppRawColors.cyan))) : null);
   }
 
   String _fmt(Duration d) { final m = d.inMinutes.remainder(60).toString().padLeft(2, '0'); final s = d.inSeconds.remainder(60).toString().padLeft(2, '0'); return '$m:$s'; }
@@ -875,6 +876,7 @@ class _FullscreenVideoPageState extends State<_FullscreenVideoPage> {
             controller: widget.videoController,
             controls: NoVideoControls,
             fit: BoxFit.contain,
+            pauseUponEnteringBackgroundMode: false,
           ),
 
           // ── Overlay ─────────────────────────────────────────
@@ -894,7 +896,7 @@ class _FullscreenVideoPageState extends State<_FullscreenVideoPage> {
                       icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 22),
                       onPressed: () => Navigator.of(context).pop(),
                       splashRadius: 20,
-                      tooltip: 'Exit fullscreen',
+                      tooltip: 'Tam ekrandan çık',
                     ),
                     Obx(() {
                       final idx = c.currentIndex.value;
@@ -1090,7 +1092,7 @@ class _DownloadBtnState extends State<_DownloadBtn> with SingleTickerProviderSta
   @override
   Widget build(BuildContext context) {
     final ctrl = Get.find<MusicPlayerController>();
-    return Tooltip(message: 'Download',
+    return Tooltip(message: 'İndir',
       child: GestureDetector(onTapDown: (_) => _press.forward(), onTapUp: (_) { _press.reverse(); widget.onTap(); }, onTapCancel: () => _press.reverse(),
         child: AnimatedBuilder(animation: _press, builder: (_, __) => Transform.scale(scale: 1.0 - _press.value * 0.08,
           child: Obx(() {
@@ -1250,7 +1252,7 @@ class _CountBadge extends StatelessWidget {
   final int count; final Color? color; const _CountBadge(this.count, {this.color});
   @override Widget build(BuildContext context) { final c = color ?? AppRawColors.cyan; return Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(color: c.withOpacity(0.08), borderRadius: BorderRadius.circular(_FC.rSm), border: Border.all(color: c.withOpacity(0.22))),
-      child: Text('$count tracks', style: TextStyle(fontFamily: _FC.font, fontSize: 10, fontWeight: FontWeight.w600, color: c))); }
+      child: Text('$count parça', style: TextStyle(fontFamily: _FC.font, fontSize: 10, fontWeight: FontWeight.w600, color: c))); }
 }
 
 class _TimeLabel extends StatelessWidget {

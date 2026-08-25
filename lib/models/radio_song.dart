@@ -24,9 +24,9 @@ class RadioSong {
       songId: json['song_id'] ?? '',
       songUrl: json['song_url'] ?? '',
       imageUrl: json['image_url'] ?? '',
-      title: json['title'] == "" ? "Suno AI Track" : json['title'],
+      title: json['title'] == "" ? "Suno AI Parçası" : json['title'],
       description: json['description'] ?? '',
-      winningStyle: json['winning_style'] ?? 'Unknown',
+      winningStyle: json['winning_style'] ?? 'Bilinmiyor',
       styles: List<String>.from(json['styles'] ?? []),
       duration: (json['duration'] as num).toDouble(),
     );

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import '../config/app_theme.dart';
@@ -93,7 +94,39 @@ class MusicPlayerController extends GetxController {
       }
     });
 
+    if (Platform.isAndroid) Permission.notification.request();
+
     fetchRadioSongs();
+  }
+
+  // ─────────────────────────────────────────────────────────
+  //  Background playback (Android foreground service)
+  //  iOS handles this via UIBackgroundModes=audio, no channel needed.
+  // ─────────────────────────────────────────────────────────
+
+  String _currentTrackTitle() {
+    final idx = currentIndex.value;
+    if (idx < 0) return 'Çalıyor';
+    if (isRadioMode.value) {
+      return idx < radioPlaylist.length ? radioPlaylist[idx].title : 'Çalıyor';
+    }
+    return idx < playlist.length ? p.basenameWithoutExtension(playlist[idx].path) : 'Çalıyor';
+  }
+
+  Future<void> _startBackgroundPlayback() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _intentChannel.invokeMethod('startPlaybackService', {
+        'title': _currentTrackTitle(),
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _stopBackgroundPlayback() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _intentChannel.invokeMethod('stopPlaybackService');
+    } catch (_) {}
   }
 
   // ─────────────────────────────────────────────────────────
@@ -103,9 +136,14 @@ class MusicPlayerController extends GetxController {
   void _initStreams() {
     _posSub = player.stream.position.listen((pos) => position.value = pos);
     _durSub = player.stream.duration.listen((dur) => duration.value = dur);
-    _stateSub = player.stream.playing.listen(
-      (playing) => isPlaying.value = playing,
-    );
+    _stateSub = player.stream.playing.listen((playing) {
+      isPlaying.value = playing;
+      if (playing) {
+        _startBackgroundPlayback();
+      } else {
+        _stopBackgroundPlayback();
+      }
+    });
     _completeSub = player.stream.completed.listen((completed) {
       if (!completed) return;
       final mode = repeatMode.value;
@@ -143,7 +181,7 @@ class MusicPlayerController extends GetxController {
         );
       }
     } catch (_) {
-      _showError('Radio Connection Error', 'Could not fetch the radio stream.');
+      _showError('Radyo Bağlantı Hatası', 'Radyo yayını alınamadı.');
     } finally {
       isLoading.value = false;
     }
@@ -167,8 +205,8 @@ class MusicPlayerController extends GetxController {
       await player.setVolume(_currentVolume * 100.0);
     } catch (e) {
       _showError(
-        'Error',
-        'Could not play: ${p.basename(playlist[index].path)}',
+        'Hata',
+        'Oynatılamadı: ${p.basename(playlist[index].path)}',
       );
     }
   }
@@ -186,7 +224,7 @@ class MusicPlayerController extends GetxController {
       await player.open(Media(radioPlaylist[index].songUrl), play: true);
       await player.setVolume(_currentVolume * 100.0);
     } catch (_) {
-      _showError('Error', 'Could not start radio stream.');
+      _showError('Hata', 'Radyo yayını başlatılamadı.');
     }
   }
 
@@ -220,7 +258,7 @@ class MusicPlayerController extends GetxController {
     }
 
     if (file == null || !await file.exists()) {
-      _showError('Open With', 'Could not open the file.');
+      _showError('Birlikte Aç', 'Dosya açılamadı.');
       return;
     }
 
@@ -364,10 +402,10 @@ class MusicPlayerController extends GetxController {
 
       await done.future;
       downloadingSongId.value = '';
-      _showSuccess('Download Complete', '$fileName\nSaved to: ${dir.path}');
+      _showSuccess('İndirme Tamamlandı', '$fileName\nKaydedildi: ${dir.path}');
     } catch (e) {
       downloadingSongId.value = '';
-      _showError('Download Error', e.toString());
+      _showError('İndirme Hatası', e.toString());
     }
   }
 
@@ -418,6 +456,7 @@ class MusicPlayerController extends GetxController {
     _durSub?.cancel();
     _stateSub?.cancel();
     _completeSub?.cancel();
+    _stopBackgroundPlayback();
     player.dispose();
     super.onClose();
   }

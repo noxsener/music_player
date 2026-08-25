@@ -2,7 +2,7 @@ name: music_player
 description: "Codenfast Player — © 2024 Codenfast. All Rights Reserved. http://codenfast.com"
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.10.7

@@ -3,6 +3,7 @@ package com.codenfast.music_player;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.OpenableColumns;
 
 import androidx.annotation.NonNull;
@@ -55,6 +56,30 @@ public class MainActivity extends FlutterActivity {
                     } catch (Exception e) {
                         result.error("COPY_FAILED", e.getMessage(), null);
                     }
+                    break;
+                }
+
+                // Flutter calls this when playback starts, so the process
+                // survives being backgrounded (keeps mpv's native thread alive).
+                case "startPlaybackService": {
+                    String title = call.argument("title");
+                    Intent svcIntent = new Intent(this, PlaybackService.class);
+                    svcIntent.putExtra(PlaybackService.EXTRA_TITLE, title);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        startForegroundService(svcIntent);
+                    } else {
+                        startService(svcIntent);
+                    }
+                    result.success(null);
+                    break;
+                }
+
+                // Flutter calls this on pause/stop to drop the foreground notification.
+                case "stopPlaybackService": {
+                    Intent svcIntent = new Intent(this, PlaybackService.class);
+                    svcIntent.setAction(PlaybackService.ACTION_STOP);
+                    startService(svcIntent);
+                    result.success(null);
                     break;
                 }
 

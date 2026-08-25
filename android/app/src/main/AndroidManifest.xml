@@ -17,6 +17,12 @@
     <!-- Internet access for radio streaming and song downloads -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- ── Background playback ──────────────────────────────────────── -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:label="Codenfast Player"
         android:name="${applicationName}"
@@ -117,6 +123,12 @@
             </intent-filter>
 
         </activity>
+
+        <!-- ── Foreground service: keeps playback alive in background ── -->
+        <service
+            android:name=".PlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
         <!-- ── FileProvider: lets the app share downloaded files ───── -->
         <!--   Required if you ever want to share files TO other apps   -->

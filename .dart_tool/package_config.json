@@ -549,8 +549,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.12.1",
+  "generatorVersion": "3.12.2",
   "flutterRoot": "file:///home/noxsener/FlutterSDK",
-  "flutterVersion": "3.44.1",
+  "flutterVersion": "3.44.6",
   "pubCache": "file:///home/noxsener/.pub-cache"
 }
